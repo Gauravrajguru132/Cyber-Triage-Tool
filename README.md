@@ -4,7 +4,7 @@
 
 Developed in partial fulfillment for the award of Bachelor of Technology in Computer Science and Engineering (IoT & Cyber Security including Blockchain Technology) at **Annasaheb Dange College of Engineering and Technology (ADCET), Ashta**.
 
-- **Project Guide:** Dr. Shabanam K. Shikalgar
+- **Project Guide:** Ms. Tejas P. Shinde
 - **Project Team:** 
   - Pragati Kiran Patil (`23101024`)
   - Tanisha Prakash Lohar (`23101009`)

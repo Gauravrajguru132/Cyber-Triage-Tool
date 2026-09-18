@@ -1,6 +1,7 @@
 import os
 import io
 import socket
+from datetime import datetime
 import qrcode
 from flask import (
     Flask, render_template, request, redirect, url_for,
@@ -17,14 +18,17 @@ from config import (
 from database import (
     init_db, save_investigation_record, get_dashboard_stats,
     get_recent_investigations, get_investigation_details,
-    get_all_cases, create_case, get_recent_audit_logs, log_activity
+    get_all_cases, create_case, get_recent_audit_logs, log_activity,
+    verify_chain_integrity
 )
 from engine.core_analyzer import analyze_evidence_file
 from engine.evidence_collector import collect_evidence_metadata
+from engine.threat_intel import enrich_ip_threat_intel, enrich_hash_threat_intel, enrich_cve_threat_intel
 from engine.live_triage import (
     collect_live_system_info, collect_live_processes,
     collect_live_network_connections, generate_live_triage_snapshot_text
 )
+from engine.task_queue import create_async_task, update_task_progress, get_task_status
 from reporting.pdf_generator import generate_pdf_report
 from reporting.json_exporter import export_to_json, export_to_stix_bundle
 from reporting.csv_exporter import export_to_csv
@@ -45,7 +49,6 @@ def get_lan_ip():
     """Detects the primary LAN / Wi-Fi IP address of this machine."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # Connecting to a public address (doesn't send packets) to find the primary interface IP
         s.connect(('8.8.8.8', 80))
         ip = s.getsockname()[0]
     except Exception:
@@ -133,14 +136,29 @@ def upload_file():
         investigator=investigator
     )
 
-    # Return JSON if requested via API, else redirect
+    # Pre-generate official PDF report immediately
+    generate_pdf_report(
+        filename=orig_filename,
+        results=analysis_results,
+        investigator_name=investigator,
+        case_number=f"CASE-{case_id:04d}"
+    )
+
     if request.headers.get("Accept") == "application/json" or request.path.startswith("/api/"):
         return jsonify({
             "status": "success",
+            "report_ready": True,
             "investigation_id": inv_id,
+            "evidence_id": ev_id,
+            "case_id": case_id,
             "filename": orig_filename,
             "risk_level": analysis_results["risk_level"],
             "risk_score": analysis_results["risk_score"],
+            "primary_threat": analysis_results["supervised_threat"]["predicted_threat"],
+            "pdf_url": url_for("api_report_by_format", fmt="pdf", id_val=inv_id, _external=True),
+            "json_url": url_for("api_report_by_format", fmt="json", id_val=inv_id, _external=True),
+            "csv_url": url_for("api_report_by_format", fmt="csv", id_val=inv_id, _external=True),
+            "stix_url": url_for("api_report_by_format", fmt="stix", id_val=inv_id, _external=True),
             "url": url_for("view_investigation", investigation_id=inv_id, _external=True)
         })
 
@@ -168,7 +186,6 @@ def run_sample_triage(sample_id):
     if not os.path.exists(sample_path):
         return f"Sample file '{target_sample_name}' not found.", 404
 
-    # Run analysis
     analysis_results = analyze_evidence_file(sample_path, original_filename=target_sample_name)
     evidence_data = analysis_results["metadata"]
 
@@ -177,6 +194,14 @@ def run_sample_triage(sample_id):
         analysis_results=analysis_results,
         case_id=1,
         investigator="Gaurav Rajguru / Pragati Patil / Tanisha Lohar"
+    )
+
+    # Pre-generate official PDF report
+    generate_pdf_report(
+        filename=target_sample_name,
+        results=analysis_results,
+        investigator_name="Gaurav Rajguru / Pragati Patil / Tanisha Lohar",
+        case_number="CASE-2026-001"
     )
 
     return redirect(url_for("view_investigation", investigation_id=inv_id))
@@ -216,6 +241,14 @@ def run_live_triage():
         analysis_results=analysis_results,
         case_id=1,
         investigator=f"{sysinfo['current_user']} (Live Sensor)"
+    )
+
+    # Pre-generate official PDF report
+    generate_pdf_report(
+        filename=filename,
+        results=analysis_results,
+        investigator_name=f"{sysinfo['current_user']} (Live Sensor)",
+        case_number="CASE-2026-001"
     )
 
     log_activity("Live Host Triage", sysinfo['current_user'], f"Captured live snapshot for {sysinfo['hostname']}")
@@ -349,17 +382,176 @@ def api_network_qr():
     buf.seek(0)
     return send_file(buf, mimetype="image/png")
 
+# =========================================================
+# RESTful API v1 (SIEM, EDR & Threat Intelligence Integrations)
+# =========================================================
+@app.route("/api/v1/analyze", methods=["POST"])
+def api_v1_analyze():
+    """Direct RESTful ingestion of text or files for automated triage."""
+    case_id = request.args.get("case_id", 1)
+    investigator = request.args.get("investigator", "API Client")
+
+    if "evidence" in request.files:
+        file = request.files["evidence"]
+        sec_filename = secure_filename(file.filename or "api_upload.log")
+        dest_path = os.path.join(app.config["UPLOAD_FOLDER"], sec_filename)
+        file.save(dest_path)
+        orig_filename = file.filename
+    elif request.is_json and "content" in request.json:
+        orig_filename = request.json.get("filename", "api_payload.log")
+        dest_path = os.path.join(app.config["UPLOAD_FOLDER"], f"api_{orig_filename}")
+        with open(dest_path, "w", encoding="utf-8") as f:
+            f.write(request.json["content"])
+    else:
+        return jsonify({"error": "Missing 'evidence' multipart file or JSON 'content'"}), 400
+
+    results = analyze_evidence_file(dest_path, original_filename=orig_filename)
+    inv_id, _ = save_investigation_record(results["metadata"], results, case_id=int(case_id), investigator=investigator)
+
+    return jsonify({
+        "status": "success",
+        "investigation_id": inv_id,
+        "filename": orig_filename,
+        "risk_score": results["risk_score"],
+        "risk_level": results["risk_level"],
+        "primary_threat_vector": results["threat_classification"]["primary_vector"],
+        "kill_chain_stage": results["kill_chain"]["kill_chain_status"],
+        "total_iocs": results["total_iocs"],
+        "total_findings": results["total_findings"],
+        "summary": results["summary"],
+        "mitre_techniques": results["mitre_mapping"],
+        "recommendations": results["recommendations"]
+    })
+
+@app.route("/api/v1/investigation/<int:investigation_id>")
+def api_v1_investigation(investigation_id):
+    inv = get_investigation_details(investigation_id)
+    if not inv:
+        return jsonify({"error": "Investigation not found"}), 404
+    return jsonify(inv)
+
+@app.route("/api/v1/chain-verify/<int:evidence_id>")
+def api_v1_chain_verify(evidence_id):
+    integrity = verify_chain_integrity(evidence_id)
+    return jsonify({
+        "evidence_id": evidence_id,
+        "integrity_verified": integrity["valid"],
+        "details": integrity
+    })
+
+@app.route("/api/v1/threat-intel/ip/<ip_str>")
+def api_v1_threat_intel_ip(ip_str):
+    return jsonify(enrich_ip_threat_intel(ip_str))
+
+@app.route("/api/v1/threat-intel/hash/<hash_str>")
+def api_v1_threat_intel_hash(hash_str):
+    return jsonify(enrich_hash_threat_intel(hash_str))
+
+@app.route("/api/v1/threat-intel/cve/<cve_str>")
+def api_v1_threat_intel_cve(cve_str):
+    return jsonify(enrich_cve_threat_intel(cve_str))
+
 @app.route("/api/stats")
 def api_stats():
     return jsonify(get_dashboard_stats())
 
-@app.route("/api/live-snapshot")
-def api_live_snapshot():
+# =========================================================
+# FRONTEND REST API INTERFACE (Cases, Upload, Analyze, Reports)
+# =========================================================
+@app.route("/api/cases", methods=["GET", "POST"])
+def api_cases():
+    if request.method == "POST":
+        data = request.get_json(silent=True) or request.form
+        case_number = data.get("case_number", f"CASE-{datetime.now().strftime('%Y%m%d%H%M')}")
+        title = data.get("title", "Digital Forensic Triage Incident")
+        investigator = data.get("investigator", "Gaurav Rajguru / Pragati Patil / Tanisha Lohar")
+        organization = data.get("organization", "ADCET Forensics Lab")
+        description = data.get("description", "Automated incident intake")
+        case_id = create_case(case_number, title, investigator, organization, description)
+        return jsonify({"status": "success", "case_id": case_id, "case_number": case_number}), 201
+    return jsonify(get_all_cases())
+
+@app.route("/api/evidence/upload", methods=["POST"])
+def api_evidence_upload():
+    if "evidence" not in request.files:
+        return jsonify({"error": "No 'evidence' file in request"}), 400
+    file = request.files["evidence"]
+    if file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+    if not allowed_file(file.filename):
+        return jsonify({"error": f"Disallowed format. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"}), 400
+
+    orig_filename = file.filename
+    sec_filename = secure_filename(orig_filename)
+    dest_path = os.path.join(app.config["UPLOAD_FOLDER"], sec_filename)
+    file.save(dest_path)
+
+    case_id = int(request.form.get("case_id", request.args.get("case_id", 1)))
+    investigator = request.form.get("investigator", request.args.get("investigator", "Investigator"))
+
+    analysis_results = analyze_evidence_file(dest_path, original_filename=orig_filename)
+    inv_id, ev_id = save_investigation_record(
+        evidence_data=analysis_results["metadata"],
+        analysis_results=analysis_results,
+        case_id=case_id,
+        investigator=investigator
+    )
+
     return jsonify({
-        "system": collect_live_system_info(),
-        "processes": collect_live_processes(),
-        "network": collect_live_network_connections()
-    })
+        "status": "success",
+        "investigation_id": inv_id,
+        "evidence_id": ev_id,
+        "case_id": case_id,
+        "filename": orig_filename,
+        "risk_score": analysis_results["risk_score"],
+        "risk_level": analysis_results["risk_level"],
+        "primary_threat": analysis_results["supervised_threat"]["predicted_threat"]
+    }), 201
+
+@app.route("/api/analyze/<int:case_id>", methods=["POST"])
+def api_analyze_case(case_id):
+    """Triggers analysis for case or parses uploaded file."""
+    if "evidence" in request.files:
+        return api_evidence_upload()
+    
+    # Retrieve latest investigation in case
+    recent = get_recent_investigations(10)
+    matching = [inv for inv in recent if inv.get("case_id") == case_id or case_id == 1]
+    if matching:
+        inv = get_investigation_details(matching[0]["id"])
+        return jsonify(inv)
+    return jsonify({"error": f"No evidence found to analyze for case #{case_id}"}), 404
+
+@app.route("/api/report/<fmt>/<int:case_id>", methods=["GET"])
+def api_report_by_format(fmt, case_id):
+    """Generates and returns professional forensic report by format (pdf, json, csv)."""
+    inv = get_investigation_details(case_id)
+    if not inv:
+        # Fallback to latest investigation
+        recent = get_recent_investigations(1)
+        if recent:
+            inv = get_investigation_details(recent[0]["id"])
+        else:
+            return jsonify({"error": "Investigation not found"}), 404
+
+    results = inv.get("results", {})
+    filename = inv.get("filename", f"evidence_case_{case_id}")
+    case_num = inv.get("case_number", f"CASE-{case_id:04d}")
+
+    if fmt == "pdf":
+        report_path = generate_pdf_report(filename, results, investigator_name=inv.get("case_investigator", "Investigator"), case_number=case_num)
+        return send_file(report_path, mimetype="application/pdf", as_attachment=True, download_name=os.path.basename(report_path))
+    elif fmt == "json":
+        report_path = export_to_json(filename, results)
+        return send_file(report_path, mimetype="application/json", as_attachment=True, download_name=os.path.basename(report_path))
+    elif fmt == "csv":
+        report_path = export_to_csv(filename, results)
+        return send_file(report_path, mimetype="text/csv", as_attachment=True, download_name=os.path.basename(report_path))
+    elif fmt == "stix":
+        report_path = export_to_stix_bundle(filename, results)
+        return send_file(report_path, mimetype="application/json", as_attachment=True, download_name=os.path.basename(report_path))
+    else:
+        return jsonify({"error": "Unsupported format. Use pdf, json, csv, or stix"}), 400
 
 if __name__ == "__main__":
     lan_ip = get_lan_ip()
@@ -368,7 +560,7 @@ if __name__ == "__main__":
 
     print("=" * 70)
     print(f"[*] {APP_NAME} v{APP_VERSION}")
-    print("[*] Academic Credits: ADCET Ashta | Dr. Shabanam K. Shikalgar")
+    print(f"[*] Academic Credits: ADCET Ashta | Guide: {PROJECT_GUIDE}")
     print("[*] Project Team: Pragati Patil, Tanisha Lohar, Gaurav Rajguru")
     print("=" * 70)
     print(f"[+] 🖥️  LOCAL ACCESS (This Machine):")
@@ -379,7 +571,6 @@ if __name__ == "__main__":
     print(f"    -> (Ensure other devices are connected to the same Wi-Fi / Hotspot)")
     print("=" * 70)
     
-    # Try printing QR code in terminal for mobile scanning
     try:
         qr = qrcode.QRCode()
         qr.add_data(network_url)
@@ -390,5 +581,4 @@ if __name__ == "__main__":
         pass
         
     print("=" * 70)
-    # Listen on 0.0.0.0 to accept connections from external devices
     app.run(host=SERVER_HOST, port=SERVER_PORT, debug=True)

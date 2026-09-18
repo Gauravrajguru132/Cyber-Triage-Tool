@@ -27,17 +27,39 @@
 
         <!-- Export Actions -->
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='pdf') }}" class="btn btn-primary" style="font-size: 12.5px;">
-                <span>📄 Export PDF Report</span>
+            <a href="{{ url_for('api_report_by_format', fmt='pdf', id_val=investigation.id) }}" class="btn btn-primary" style="font-size: 12.5px; background: linear-gradient(135deg, #0284c7, #06b6d4);">
+                <span>📥 Download Official Report (PDF)</span>
             </a>
-            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='json') }}" class="btn btn-secondary" style="font-size: 12.5px;">
+            <a href="{{ url_for('api_report_by_format', fmt='json', id_val=investigation.id) }}" class="btn btn-secondary" style="font-size: 12.5px;">
                 <span>Structured JSON</span>
             </a>
-            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='stix') }}" class="btn btn-secondary" style="font-size: 12.5px;">
+            <a href="{{ url_for('api_report_by_format', fmt='stix', id_val=investigation.id) }}" class="btn btn-secondary" style="font-size: 12.5px;">
                 <span>STIX 2.1 Intel</span>
             </a>
-            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='csv') }}" class="btn btn-secondary" style="font-size: 12.5px;">
+            <a href="{{ url_for('api_report_by_format', fmt='csv', id_val=investigation.id) }}" class="btn btn-secondary" style="font-size: 12.5px;">
                 <span>CSV Table</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Official Report Download Action Callout -->
+<div class="panel-card" style="background: linear-gradient(135deg, rgba(10, 37, 64, 0.9), rgba(15, 23, 42, 0.9)); border: 1.5px solid var(--accent-cyan); padding: 14px 20px; margin-bottom: 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 26px;">🛡️</div>
+            <div>
+                <h3 style="font-size: 14.5px; font-weight: 700; color: #ffffff; margin-bottom: 2px;">
+                    Official Cyber Forensic Investigation Report Ready
+                </h3>
+                <p style="font-size: 12px; color: var(--text-secondary);">
+                    Formal DFIR investigation document signed by Lead Forensic Examiners and Guide <strong>Ms. Tejas P. Shinde</strong> (ADCET Ashta).
+                </p>
+            </div>
+        </div>
+        <div>
+            <a href="{{ url_for('api_report_by_format', fmt='pdf', id_val=investigation.id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #06b6d4); font-size: 13px; font-weight: 600; padding: 9px 18px; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);">
+                <span>📥 Download Official Investigation Report (PDF)</span>
             </a>
         </div>
     </div>

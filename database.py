@@ -104,6 +104,21 @@ def init_db():
         )
     """)
 
+    # Auto-migrate existing database tables if new columns are missing
+    cursor.execute("PRAGMA table_info(chain_of_custody)")
+    custody_cols = [col[1] for col in cursor.fetchall()]
+    if "prev_block_hash" not in custody_cols:
+        cursor.execute("ALTER TABLE chain_of_custody ADD COLUMN prev_block_hash TEXT DEFAULT 'GENESIS_CUSTODY_BLOCK_0000000000'")
+    if "block_hash" not in custody_cols:
+        cursor.execute("ALTER TABLE chain_of_custody ADD COLUMN block_hash TEXT DEFAULT 'GENESIS_CUSTODY_BLOCK_0000000000'")
+
+    cursor.execute("PRAGMA table_info(audit_logs)")
+    audit_cols = [col[1] for col in cursor.fetchall()]
+    if "prev_hash" not in audit_cols:
+        cursor.execute("ALTER TABLE audit_logs ADD COLUMN prev_hash TEXT DEFAULT 'GENESIS_AUDIT_BLOCK_000000000000'")
+    if "block_hash" not in audit_cols:
+        cursor.execute("ALTER TABLE audit_logs ADD COLUMN block_hash TEXT DEFAULT 'GENESIS_AUDIT_BLOCK_000000000000'")
+
     # Seed default case if none exists
     cursor.execute("SELECT COUNT(*) FROM cases")
     if cursor.fetchone()[0] == 0:
@@ -404,13 +419,27 @@ def create_case(case_number, title, investigator, organization, description):
     conn = get_db_connection()
     cursor = conn.cursor()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute("""
-        INSERT INTO cases (case_number, title, investigator, organization, description, status, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 'Active', ?, ?)
-    """, (case_number, title, investigator, organization, description, now, now))
-    case_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
+
+    # Check if case_number already exists
+    cursor.execute("SELECT id FROM cases WHERE case_number = ?", (case_number,))
+    existing = cursor.fetchone()
+    if existing:
+        conn.close()
+        return existing[0]
+
+    try:
+        cursor.execute("""
+            INSERT INTO cases (case_number, title, investigator, organization, description, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, 'Active', ?, ?)
+        """, (case_number, title, investigator, organization, description, now, now))
+        case_id = cursor.lastrowid
+        conn.commit()
+    except sqlite3.IntegrityError:
+        cursor.execute("SELECT id FROM cases WHERE case_number = ?", (case_number,))
+        case_id = cursor.fetchone()[0]
+    finally:
+        conn.close()
+
     log_activity("Create Case", investigator, f"Created new case {case_number}: {title}")
     return case_id
 

