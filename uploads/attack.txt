@@ -1,0 +1,13 @@
+malware
+ransomware
+phishing
+trojan
+keylogger
+backdoor
+unauthorized
+suspicious
+failed login
+brute force
+exploit
+attack
+malicious

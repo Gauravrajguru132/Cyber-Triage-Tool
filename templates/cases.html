@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Case Management & Chain of Custody - Cyber Triage{% endblock %}
+{% block header_title %}Case Management & Chain of Custody Ledger{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Active Cases List -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>📂</span> Active Investigation Cases</h2>
+            <span class="badge badge-info">{{ cases|length }} Cases</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Case Number</th>
+                        <th>Title</th>
+                        <th>Lead Investigator</th>
+                        <th>Evidence Items</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cases %}
+                        <tr>
+                            <td><strong>{{ c.case_number }}</strong></td>
+                            <td>{{ c.title }}</td>
+                            <td>{{ c.investigator }}</td>
+                            <td><span class="badge badge-info">{{ c.evidence_count }} Items</span></td>
+                            <td><span class="badge badge-low">{{ c.status }}</span></td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">{{ c.created_at }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create New Case Form -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>➕</span> Open New Case</h2>
+        </div>
+        <form action="{{ url_for('create_case_route') }}" method="POST">
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Case Identifier</label>
+                <input type="text" name="case_number" value="CASE-2026-00{{ cases|length + 1 }}" required style="width: 100%; padding: 8px; background: #080c14; border: 1px solid var(--border-color); color: white; border-radius: var(--radius-sm);">
+            </div>
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Case Title</label>
+                <input type="text" name="title" placeholder="e.g. Finance Server Ransomware Investigation" required style="width: 100%; padding: 8px; background: #080c14; border: 1px solid var(--border-color); color: white; border-radius: var(--radius-sm);">
+            </div>
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Lead Investigator</label>
+                <input type="text" name="investigator" value="Gaurav Rajguru / Pragati Patil / Tanisha Lohar" required style="width: 100%; padding: 8px; background: #080c14; border: 1px solid var(--border-color); color: white; border-radius: var(--radius-sm);">
+            </div>
+            <div style="margin-bottom: 14px;">
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Organization / Agency</label>
+                <input type="text" name="organization" value="ADCET Digital Forensics Lab" style="width: 100%; padding: 8px; background: #080c14; border: 1px solid var(--border-color); color: white; border-radius: var(--radius-sm);">
+            </div>
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Description</label>
+                <textarea name="description" rows="3" placeholder="Case scope and incident context..." style="width: 100%; padding: 8px; background: #080c14; border: 1px solid var(--border-color); color: white; border-radius: var(--radius-sm);"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Case</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

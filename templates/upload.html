@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Evidence Intake & Ingestion - Cyber Triage Platform{% endblock %}
+{% block header_title %}Digital Evidence Intake & Triage Portal{% endblock %}
+
+{% block content %}
+<!-- Mobile / Remote Ingestion Alert Banner -->
+<div class="panel-card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(59, 130, 246, 0.1)); border-color: var(--accent-cyan); padding: 16px 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 24px;">📱</div>
+            <div>
+                <strong style="color: var(--text-primary); font-size: 13.5px;">Multi-Device & Remote Evidence Upload Active</strong>
+                <p style="color: var(--text-secondary); font-size: 12px; margin-top: 2px;">
+                    You or any team member on another laptop/mobile connected to Wi-Fi can open 
+                    <code style="color: var(--accent-cyan); background: #080c14; padding: 2px 6px; border-radius: 4px;">{{ server_network_url }}</code> to upload files directly.
+                </p>
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="openNetworkModal()" style="font-size: 11.5px; padding: 6px 12px;">
+            Show QR Code
+        </button>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Main Upload Panel -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>📁</span> Upload Forensic Evidence File</h2>
+            <span class="badge badge-info">Multi-Format Forensic Parsing</span>
+        </div>
+
+        <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+            <!-- Case & Investigator inputs -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Select Case</label>
+                    <select name="case_id" style="width: 100%; padding: 10px; background: #080c14; border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm);">
+                        {% for c in cases %}
+                            <option value="{{ c.id }}">{{ c.case_number }} - {{ c.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Lead Investigator</label>
+                    <input type="text" name="investigator" value="Gaurav Rajguru / Pragati Patil / Tanisha Lohar" style="width: 100%; padding: 10px; background: #080c14; border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-sm);">
+                </div>
+            </div>
+
+            <!-- Drag & Drop Zone (Clickable / Tap-friendly for mobile) -->
+            <div class="dropzone" id="dropArea" onclick="document.getElementById('fileInput').click()">
+                <div class="dropzone-icon">☁️</div>
+                <h3 style="font-size: 16px; margin-bottom: 6px;">Tap or Drag Digital Evidence File Here</h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Supports: <code>.LOG</code>, <code>.TXT</code>, <code>.CSV</code>, <code>.JSON</code>, <code>.REG</code>, <code>.EVTX</code>, <code>.PCAP</code>, <code>.DUMP</code>, <code>.SYSINFO</code>
+                </p>
+                <input type="file" name="evidence" id="fileInput" accept=".txt,.log,.csv,.json,.reg,.evtx,.pcap,.dump,.sysinfo,.xml" style="display: none;" required>
+                <button type="button" class="btn btn-secondary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+                    Browse Files on Device
+                </button>
+                <div id="fileInfo" style="margin-top: 14px; font-size: 13px; color: var(--accent-cyan); font-weight: 600;"></div>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="reset" class="btn btn-secondary">Clear</button>
+                <button type="submit" class="btn btn-primary" id="startTriageBtn">
+                    <span>⚡ Run Automated Forensic Triage</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Side Options & Live Triage Card -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- Live Endpoint Triage Trigger -->
+        <div class="panel-card" style="border-color: rgba(6, 182, 212, 0.4); background: linear-gradient(135deg, rgba(19, 27, 46, 0.9), rgba(8, 12, 20, 0.9));">
+            <div class="panel-header" style="border-bottom: none; margin-bottom: 10px;">
+                <h2><span>⚡</span> Live Host Triage</h2>
+                <span class="badge badge-low">Local Sensor</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px;">
+                Capture real-time active processes, network sockets, listening ports, and startup persistence keys directly from this endpoint.
+            </p>
+            <form action="{{ url_for('run_live_triage') }}" method="POST">
+                <button type="submit" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #0284c7, #06b6d4);">
+                    <span>🛰️ Acquire & Triage Live Host</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Sample Demonstration Scenarios -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <h2><span>🧪</span> Pre-Loaded Scenarios</h2>
+            </div>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                Click any scenario to test without manual uploads:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <form method="POST" action="{{ url_for('run_sample_triage', sample_id='ransomware') }}">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 12px; justify-content: flex-start;">
+                        🔴 LockBit Ransomware Attack
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('run_sample_triage', sample_id='web') }}">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 12px; justify-content: flex-start;">
+                        🟠 WebShell & SQL Injection
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('run_sample_triage', sample_id='apt') }}">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 12px; justify-content: flex-start;">
+                        🟡 APT Registry Persistence
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('run_sample_triage', sample_id='network') }}">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 12px; justify-content: flex-start;">
+                        🔵 Cobalt Strike C2 Traffic
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('run_sample_triage', sample_id='memory') }}">
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 12px; justify-content: flex-start;">
+                        🟣 LSASS Mimikatz Memory Dump
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const dropArea = document.getElementById('dropArea');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('fileInfo');
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropArea.classList.add('dragover');
+    }, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+    }, false);
+});
+
+dropArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropArea.classList.remove('dragover');
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        updateFileInfo(files[0]);
+    }
+});
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        updateFileInfo(fileInput.files[0]);
+    }
+});
+
+function updateFileInfo(file) {
+    fileInfo.innerText = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+}
+</script>
+{% endblock %}

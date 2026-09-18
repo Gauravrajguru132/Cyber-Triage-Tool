@@ -1,0 +1,13 @@
+IOC_Type,Indicator_Value,Defanged_Value,Classification_Context,Severity
+IPv4,185.220.101.5,185[.]220[.]101[.]5,Public / External,High
+IPv4,194.26.29.112,194[.]26[.]29[.]112,Public / External,High
+URL,http://185.220.101.5/payload/stage2.exe,hxxp://185[.]220[.]101[.]5/payload/stage2[.]exe,HTTP,High
+SHA-256,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855,Cryptographic Hash,High
+MD5,7b2c9a6234b071e62a8291a13426e95c,7b2c9a6234b071e62a8291a13426e95c,Cryptographic Hash,High
+LOLBAS_Command,powershell.exe -nop -w hidden -enc,powershell.exe -nop -w hidden -enc,powershell(?:\.exe)?\s+.*-(?:enc|encodedcommand|w\s+hidden|nop|noni|exec\s+bypass),High
+LOLBAS_Command,vssadmin.exe delete shadows,vssadmin.exe delete shadows,vssadmin(?:\.exe)?\s+delete\s+shadows,Critical
+LOLBAS_Command,wmic shadowcopy delete,wmic shadowcopy delete,wmic(?:\.exe)?\s+shadowcopy\s+delete,High
+LOLBAS_Command,wbadmin.exe delete catalog,wbadmin.exe delete catalog,wbadmin(?:\.exe)?\s+delete\s+catalog,High
+LOLBAS_Command,bcdedit.exe /set {default} recoveryenabled no,bcdedit.exe /set {default} recoveryenabled no,bcdedit(?:\.exe)?\s+/set\s+.*recoveryenabled\s+no,High
+LOLBAS_Command,WebClient,WebClient,downloadstring|downloadfile|webclient,High
+LOLBAS_Command,DownloadFile,DownloadFile,downloadstring|downloadfile|webclient,High

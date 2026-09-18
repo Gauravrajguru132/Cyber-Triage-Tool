@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cyber Triage Tool - Advanced DFIR Platform{% endblock %}</title>
+    
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Chart.js CDN for interactive visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand-section">
+            <div class="brand-logo">🛡️</div>
+            <div class="brand-info">
+                <h2>CYBER TRIAGE</h2>
+                <p>Enterprise DFIR</p>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                <a href="{{ url_for('dashboard') }}">
+                    <span>📊</span>
+                    <span>SOC Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item {% if active_page == 'upload' %}active{% endif %}">
+                <a href="{{ url_for('upload_page') }}">
+                    <span>📁</span>
+                    <span>Evidence Intake</span>
+                </a>
+            </li>
+            <li class="nav-item {% if active_page == 'live_triage' %}active{% endif %}">
+                <a href="{{ url_for('live_triage_page') }}">
+                    <span>⚡</span>
+                    <span>Live Host Triage</span>
+                </a>
+            </li>
+            <li class="nav-item {% if active_page == 'cases' %}active{% endif %}">
+                <a href="{{ url_for('cases_page') }}">
+                    <span>📂</span>
+                    <span>Case & Custody</span>
+                </a>
+            </li>
+            <li class="nav-item {% if active_page == 'history' %}active{% endif %}">
+                <a href="{{ url_for('history_page') }}">
+                    <span>📋</span>
+                    <span>Investigation Logs</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <p><strong>ADCET Digital Forensics</strong></p>
+            <p>Guide: Ms. Tejas P. Shinde</p>
+            <p>Team: Pragati, Tanisha, Gaurav</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="page-title">
+                <h1>{% block header_title %}Digital Forensics & Cyber Triage Platform{% endblock %}</h1>
+            </div>
+            <div class="topbar-actions">
+                <!-- Mobile / Network Access Button -->
+                <button type="button" class="btn btn-secondary" onclick="openNetworkModal()" style="padding: 7px 13px; font-size: 12px; border-color: var(--accent-cyan);">
+                    <span>📱 Connect Mobile / Laptop</span>
+                </button>
+
+                <div class="system-status">
+                    <div class="pulse-dot"></div>
+                    <span>AI Engine Active</span>
+                </div>
+                <a href="{{ url_for('upload_page') }}" class="btn btn-primary" style="padding: 8px 14px; font-size: 12.5px;">
+                    <span>+ Ingest Evidence</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content-container">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Network Access / QR Modal -->
+    <div id="networkModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-highlight); border-radius: var(--radius-md); max-width: 500px; width: 90%; padding: 26px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); position: relative;">
+            <button onclick="closeNetworkModal()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">&times;</button>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 36px; margin-bottom: 6px;">📱</div>
+                <h3 style="font-size: 18px; color: var(--text-primary);">Open on Mobile Phone or Other Laptop</h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 4px;">
+                    Access this cyber triage tool and upload evidence from any device on your Wi-Fi or mobile hotspot network.
+                </p>
+            </div>
+
+            <!-- QR Code Display -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-block; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <img src="{{ url_for('api_network_qr') }}" alt="Scan QR Code" style="width: 180px; height: 180px; display: block;">
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 8px;">Scan with your mobile camera to open instantly</div>
+            </div>
+
+            <!-- URL Input & Copy -->
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 11.5px; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; font-weight: 600;">Direct Network Address</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="networkUrlInput" value="{{ server_network_url }}" readonly style="flex-grow: 1; padding: 9px 12px; background: #080c14; border: 1px solid var(--border-color); color: var(--accent-cyan); font-family: monospace; font-size: 13px; border-radius: var(--radius-sm);">
+                    <button class="btn btn-primary" onclick="copyNetworkUrl(this)" style="padding: 8px 14px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+
+            <!-- Instructions Checklist -->
+            <div style="background: rgba(11, 15, 23, 0.7); padding: 12px; border-radius: var(--radius-sm); font-size: 11.5px; color: var(--text-secondary); line-height: 1.5;">
+                <div>✔️ <strong>Requirement:</strong> Both devices must be on the same Wi-Fi network or Mobile Hotspot.</div>
+                <div>✔️ <strong>Upload Support:</strong> Mobile devices can directly pick and upload log files, JSON, CSV, or take photo evidence.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timeline.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+    <script>
+        function openNetworkModal() {
+            document.getElementById('networkModal').style.display = 'flex';
+        }
+        function closeNetworkModal() {
+            document.getElementById('networkModal').style.display = 'none';
+        }
+        function copyNetworkUrl(btn) {
+            const input = document.getElementById('networkUrlInput');
+            navigator.clipboard.writeText(input.value).then(() => {
+                const orig = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerText = orig;
+                    btn.classList.remove('btn-success');
+                }, 1800);
+            });
+        }
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('networkModal');
+            if (e.target === modal) {
+                closeNetworkModal();
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

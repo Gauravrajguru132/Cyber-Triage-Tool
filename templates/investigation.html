@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+
+{% block title %}Investigation #{{ investigation.id }} - {{ investigation.filename }} | Cyber Triage{% endblock %}
+{% block header_title %}Forensic Investigation Case #{{ investigation.id }}: {{ investigation.filename }}{% endblock %}
+
+{% block content %}
+<!-- Top Investigation Header Summary Banner -->
+<div class="panel-card" style="background: linear-gradient(135deg, rgba(19, 27, 46, 0.95), rgba(15, 23, 42, 0.95)); border-color: rgba(59, 130, 246, 0.3);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span class="badge badge-{{ investigation.risk_level.lower() }}" style="font-size: 13px; padding: 6px 14px;">
+                    {{ investigation.risk_level.upper() }} RISK ({{ investigation.risk_score }}/100)
+                </span>
+                <span class="badge badge-info">{{ investigation.threat_classification }}</span>
+                {% if investigation.ml_anomaly_status == 'Normal' %}
+                    <span class="badge badge-low">AI: Normal</span>
+                {% else %}
+                    <span class="badge badge-critical">AI: {{ investigation.ml_anomaly_status }}</span>
+                {% endif %}
+            </div>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 6px;">{{ investigation.filename }}</h2>
+            <div style="font-size: 12px; color: var(--text-muted); font-family: monospace;">
+                SHA-256: <span style="color: var(--accent-cyan);">{{ investigation.sha256 }}</span>
+            </div>
+        </div>
+
+        <!-- Export Actions -->
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='pdf') }}" class="btn btn-primary" style="font-size: 12.5px;">
+                <span>📄 Export PDF Report</span>
+            </a>
+            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='json') }}" class="btn btn-secondary" style="font-size: 12.5px;">
+                <span>Structured JSON</span>
+            </a>
+            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='stix') }}" class="btn btn-secondary" style="font-size: 12.5px;">
+                <span>STIX 2.1 Intel</span>
+            </a>
+            <a href="{{ url_for('download_report', investigation_id=investigation.id, fmt='csv') }}" class="btn btn-secondary" style="font-size: 12.5px;">
+                <span>CSV Table</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tabs-nav">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-overview')">⚡ Threat & AI Overview</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-mitre')">🎯 MITRE ATT&CK Matrix ({{ investigation.results.mitre_mapping|length }})</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-iocs')">🚨 IOC Explorer ({{ investigation.total_iocs }})</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-timeline')">⏱️ Attack Timeline ({{ investigation.results.timeline|length }})</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-ai')">🧠 AI Decision Playbook</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-graph'); triggerGraphRender();">🕸️ Correlation Graph</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-raw')">📜 Raw Evidence & Custody</button>
+</div>
+
+<!-- ===================================================================
+     TAB 1: THREAT & AI OVERVIEW
+=================================================================== -->
+<div id="tab-overview" class="tab-pane active">
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+        <!-- Left: Summary & Attack Narrative -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h2><span>📝</span> Executive Threat Summary</h2>
+                </div>
+                <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); margin-bottom: 16px;">
+                    {{ investigation.summary }}
+                </p>
+                <div style="background: rgba(11, 15, 23, 0.6); padding: 14px; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-blue);">
+                    <div style="font-size: 11.5px; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700; margin-bottom: 4px;">Primary Threat Vector Narrative</div>
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        {{ investigation.results.threat_classification.narrative }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Threat Signatures & YARA Rule Hits -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h2><span>🔍</span> Matched Threat Signatures & Heuristic Rules</h2>
+                    <span class="badge badge-info">{{ investigation.results.yara_matches|length }} Matches</span>
+                </div>
+                {% if investigation.results.yara_matches %}
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        {% for yara in investigation.results.yara_matches %}
+                            <div style="background: rgba(11, 15, 23, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <strong>{{ yara.rule_name }}</strong>
+                                    <span class="badge badge-{{ yara.severity.lower() }}">{{ yara.severity }}</span>
+                                </div>
+                                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 8px;">{{ yara.description }}</p>
+                                <div style="font-size: 11.5px; color: var(--text-muted);">
+                                    <span>MITRE: <code>{{ yara.mitre_id }} - {{ yara.mitre_name }}</code></span> | 
+                                    <span>Hits: <strong>{{ yara.hits_count }}</strong></span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="font-size: 13px; color: var(--text-muted);">No specific threat signatures matched.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right: Metrics & Anomaly Gauge -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- AI Isolation Forest Card -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h2><span>🤖</span> ML Anomaly Model</h2>
+                </div>
+                <div style="text-align: center; padding: 10px 0;">
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Anomaly Index</div>
+                    <div style="font-size: 38px; font-weight: 800; color: {% if investigation.results.ml_anomaly.is_anomaly %}var(--crit-red){% else %}var(--low-green){% endif %}; margin: 4px 0;">
+                        {{ investigation.results.ml_anomaly.anomaly_score }}
+                    </div>
+                    <span class="badge {% if investigation.results.ml_anomaly.is_anomaly %}badge-critical{% else %}badge-low{% endif %}">
+                        {{ investigation.results.ml_anomaly.confidence }}
+                    </span>
+                </div>
+                <div style="margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 12px; font-size: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--text-secondary);">
+                        <span>Evaluated Features</span>
+                        <span>Weight Contribution</span>
+                    </div>
+                    {% for k, v in investigation.results.ml_anomaly.evaluated_features.items() %}
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-muted); font-size: 11.5px;">
+                            <span>{{ k }}</span>
+                            <span style="color: var(--text-primary); font-weight: 600;">{{ v }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Binary & Entropy Analysis -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h2><span>📦</span> Structure & Entropy</h2>
+                </div>
+                <div style="font-size: 12.5px; display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <div style="color: var(--text-muted); margin-bottom: 2px;">Shannon Entropy:</div>
+                        <div style="font-weight: 700; font-size: 15px; color: var(--text-primary);">
+                            {{ investigation.results.binary_info.entropy }} / 8.0
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">{{ investigation.results.binary_info.entropy_status }}</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-muted); margin-bottom: 2px;">Executable Headers:</div>
+                        <div>{% if investigation.results.binary_info.is_pe_executable %}<span class="badge badge-high">PE Binary</span>{% else %}<span class="badge badge-info">Document / Text / Log</span>{% endif %}</div>
+                    </div>
+                    {% if investigation.results.binary_info.is_packed %}
+                        <div>
+                            <span class="badge badge-critical">Packed / Obfuscated Binary Detected</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     TAB 2: MITRE ATT&CK MATRIX
+=================================================================== -->
+<div id="tab-mitre" class="tab-pane">
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>🎯</span> MITRE ATT&CK Enterprise Matrix Alignment</h2>
+            <span class="badge badge-info">{{ investigation.results.mitre_mapping|length }} Mapped Techniques</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
+            The cyber triage engine correlated the following adversarial tactics, techniques, and observed evidence triggers:
+        </p>
+
+        {% if investigation.results.mitre_mapping %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+                {% for tech in investigation.results.mitre_mapping %}
+                    <div style="background: rgba(11, 15, 23, 0.8); border: 1px solid var(--border-color); border-left: 4px solid {{ tech.color }}; border-radius: var(--radius-sm); padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 11px; font-weight: 700; color: {{ tech.color }}; text-transform: uppercase;">{{ tech.tactic_name }}</span>
+                            <code style="background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 11px;">{{ tech.technique_id }}</code>
+                        </div>
+                        <h3 style="font-size: 14.5px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">{{ tech.technique_name }}</h3>
+                        <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px;">{{ tech.description }}</p>
+                        <div style="background: rgba(0,0,0,0.4); padding: 8px 10px; border-radius: 4px; font-size: 11px; color: var(--accent-cyan); font-family: monospace;">
+                            Trigger: {{ tech.evidence_trigger }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted); padding: 20px 0;">No standard MITRE techniques triggered by this evidence.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===================================================================
+     TAB 3: IOC EXPLORER
+=================================================================== -->
+<div id="tab-iocs" class="tab-pane">
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>🚨</span> Extracted Indicators of Compromise (IOCs)</h2>
+            <span class="badge badge-info">{{ investigation.total_iocs }} Extracted</span>
+        </div>
+
+        <!-- IP Table -->
+        {% if investigation.results.iocs.ips %}
+            <h3 style="font-size: 14px; margin: 16px 0 8px; color: var(--accent-cyan);">IP Addresses</h3>
+            <div class="table-responsive" style="margin-bottom: 20px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Defanged Display</th>
+                            <th>Network Classification</th>
+                            <th>Reputation</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ip in investigation.results.iocs.ips %}
+                            <tr>
+                                <td><code>{{ ip.value }}</code></td>
+                                <td><code style="color: var(--accent-blue);">{{ ip.defanged }}</code></td>
+                                <td>
+                                    {% if 'Public' in ip.category %}
+                                        <span class="badge badge-high">{{ ip.category }}</span>
+                                    {% else %}
+                                        <span class="badge badge-low">{{ ip.category }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ ip.reputation }}</td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="copyToClipboard('{{ ip.value }}', this)">Copy</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <!-- LOLBAS Commands -->
+        {% if investigation.results.iocs.lolbas_commands %}
+            <h3 style="font-size: 14px; margin: 16px 0 8px; color: var(--high-orange);">Living-Off-The-Land (LOLBAS) & Suspicious Commands</h3>
+            <div class="table-responsive" style="margin-bottom: 20px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Severity</th>
+                            <th>Executed Command</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cmd in investigation.results.iocs.lolbas_commands %}
+                            <tr>
+                                <td><span class="badge badge-{{ cmd.severity.lower() }}">{{ cmd.severity }}</span></td>
+                                <td><code style="color: #fca5a5;">{{ cmd.command }}</code></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="copyToClipboard('{{ cmd.command }}', this)">Copy</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <!-- Hashes & URLs -->
+        {% if investigation.results.iocs.hashes or investigation.results.iocs.urls %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h3 style="font-size: 14px; margin-bottom: 8px; color: var(--text-primary);">Cryptographic Hashes</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Type</th><th>Hash Value</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for h in investigation.results.iocs.hashes %}
+                                    <tr>
+                                        <td><strong>{{ h.type }}</strong></td>
+                                        <td><code style="font-size: 11px;">{{ h.value }}</code></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 14px; margin-bottom: 8px; color: var(--text-primary);">URLs / Endpoints</h3>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>URL</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for u in investigation.results.iocs.urls %}
+                                    <tr>
+                                        <td><code style="font-size: 11px; color: var(--accent-cyan);">{{ u.defanged }}</code></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===================================================================
+     TAB 4: ATTACK TIMELINE
+=================================================================== -->
+<div id="tab-timeline" class="tab-pane">
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>⏱️</span> Chronological Incident Timeline</h2>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="timelineSearch" placeholder="Search events..." style="padding: 6px 12px; background: #080c14; border: 1px solid var(--border-color); color: white; border-radius: var(--radius-sm); font-size: 12px;">
+                <select id="severityFilter" style="padding: 6px 10px; background: #080c14; border: 1px solid var(--border-color); color: white; border-radius: var(--radius-sm); font-size: 12px;">
+                    <option value="ALL">All Severities</option>
+                    <option value="CRITICAL">Critical</option>
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                </select>
+            </div>
+        </div>
+
+        {% if investigation.results.timeline %}
+            <div class="timeline-list">
+                {% for ev in investigation.results.timeline %}
+                    <div class="timeline-item {{ ev.severity }}" data-severity="{{ ev.severity }}">
+                        <div class="timeline-time">{{ ev.timestamp }}</div>
+                        <div class="timeline-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="font-size: 13px;">{{ ev.category }}</strong>
+                                <span class="badge badge-{{ ev.severity.lower() }}">{{ ev.severity }}</span>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-secondary); font-family: monospace; word-break: break-all;">
+                                {{ ev.description }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted); padding: 20px 0;">No structured chronological timestamps found in evidence.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===================================================================
+     TAB 5: AI DECISION PLAYBOOK
+=================================================================== -->
+<div id="tab-ai" class="tab-pane">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Left: Containment Actions -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <h2><span>🛡️</span> Prioritized Containment Playbook</h2>
+                <span class="badge badge-critical">{{ investigation.results.recommendations.priority_level }}</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px;">
+                {{ investigation.results.recommendations.threat_summary }}
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for act in investigation.results.recommendations.containment_actions %}
+                    <div style="background: rgba(11, 15, 23, 0.7); border: 1px solid var(--border-color); border-left: 3px solid var(--crit-red); border-radius: var(--radius-sm); padding: 14px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong style="font-size: 13px; color: var(--text-primary);">{{ act.phase }}</strong>
+                            <span class="badge badge-critical">{{ act.urgency }}</span>
+                        </div>
+                        <p style="font-size: 12.5px; color: var(--text-secondary);">{{ act.action }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right: Forensic Checklist & Scripts -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h2><span>📋</span> Forensic Evidence Preservation Checklist</h2>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for item in investigation.results.recommendations.investigation_checklist %}
+                        <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" style="margin-top: 3px;">
+                            <span>{{ item }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if investigation.results.recommendations.containment_scripts %}
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h2><span>⚡</span> Generated Mitigation Script</h2>
+                    </div>
+                    {% for scr in investigation.results.recommendations.containment_scripts %}
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-size: 12px; color: var(--accent-cyan); font-weight: 600; margin-bottom: 6px;">{{ scr.title }}</div>
+                            <pre class="code-box">{{ scr.code }}</pre>
+                            <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11.5px;" onclick="copyToClipboard(`{{ scr.code }}`, this)">Copy Script</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     TAB 6: CORRELATION GRAPH
+=================================================================== -->
+<div id="tab-graph" class="tab-pane">
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>🕸️</span> Interactive Threat Correlation & Entity Network Graph</h2>
+            <span class="badge badge-info">Draggable & Interactive Physics</span>
+        </div>
+        <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 12px;">
+            Visualizes links between evidence artifacts, external C2/IP addresses, matched signatures, and MITRE techniques. Drag nodes to explore relationships.
+        </p>
+        <canvas id="correlationCanvas"></canvas>
+    </div>
+</div>
+
+<!-- ===================================================================
+     TAB 7: RAW EVIDENCE & CHAIN OF CUSTODY
+=================================================================== -->
+<div id="tab-raw" class="tab-pane">
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- Chain of Custody Table -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <h2><span>🔐</span> Chain of Custody & Cryptographic Hash Ledger</h2>
+                <span class="badge badge-low">Verified Unaltered</span>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Performed By</th>
+                            <th>Timestamp</th>
+                            <th>Verification SHA-256</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in investigation.chain_of_custody %}
+                            <tr>
+                                <td><strong>{{ entry.action }}</strong></td>
+                                <td>{{ entry.performed_by }}</td>
+                                <td style="font-size: 12px; color: var(--text-secondary);">{{ entry.timestamp }}</td>
+                                <td><code style="font-size: 11px;">{{ entry.verification_hash }}</code></td>
+                                <td style="font-size: 12px; color: var(--text-secondary);">{{ entry.notes }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Raw Preview -->
+        <div class="panel-card">
+            <div class="panel-header">
+                <h2><span>📜</span> Raw Evidence Content Preview</h2>
+            </div>
+            <pre class="code-box">{{ investigation.results.raw_preview }}</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function openTab(evt, tabName) {
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    
+    tabPanes.forEach(pane => pane.classList.remove('active'));
+    tabBtns.forEach(btn => btn.classList.remove('active'));
+
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+}
+
+// Pass graph data safely to JS
+const graphData = {{ investigation.results.graph_data|tojson }};
+let graphRendered = false;
+
+function triggerGraphRender() {
+    if (!graphRendered && graphData) {
+        setTimeout(() => {
+            initCorrelationGraph(graphData);
+            graphRendered = true;
+        }, 100);
+    }
+}
+</script>
+{% endblock %}

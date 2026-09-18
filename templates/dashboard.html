@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}SOC Dashboard - Cyber Triage Platform{% endblock %}
+{% block header_title %}SOC Forensic Triage & Threat Intelligence Dashboard{% endblock %}
+
+{% block content %}
+<!-- Top Metrics Grid -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>Total Evidence Ingested</span>
+            <span>📁</span>
+        </div>
+        <div class="stat-value">{{ stats.total_evidence }}</div>
+        <div class="stat-desc">Cryptographically hashed & preserved</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>Indicators of Compromise</span>
+            <span>🚨</span>
+        </div>
+        <div class="stat-value" style="color: #60a5fa;">{{ stats.total_iocs }}</div>
+        <div class="stat-desc">IPs, URLs, Hashes & C2 nodes</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>Suspicious Artifacts</span>
+            <span>⚠️</span>
+        </div>
+        <div class="stat-value" style="color: #f59e0b;">{{ stats.suspicious_findings }}</div>
+        <div class="stat-desc">Signatures, LOLBAS & keywords</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>Critical Incident Alerts</span>
+            <span>🔥</span>
+        </div>
+        <div class="stat-value" style="color: #ef4444;">{{ stats.critical_alerts }}</div>
+        <div class="stat-desc">High & Critical severity events</div>
+    </div>
+</div>
+
+<!-- Threat Visualizations Row -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px;">
+    <!-- Risk Distribution Panel -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>🎯</span> Risk Severity Breakdown</h2>
+            <span class="badge badge-info">Calibrated 0-100</span>
+        </div>
+        <div style="height: 240px; position: relative;">
+            <canvas id="riskChart"
+                    data-low="{{ stats.risk_distribution.Low }}"
+                    data-medium="{{ stats.risk_distribution.Medium }}"
+                    data-high="{{ stats.risk_distribution.High }}"
+                    data-critical="{{ stats.risk_distribution.Critical }}">
+            </canvas>
+        </div>
+    </div>
+
+    <!-- Threat Vector Radar -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>🌐</span> Threat Vector Classification</h2>
+            <span class="badge badge-info">Multi-Vector AI</span>
+        </div>
+        <div style="height: 240px; position: relative;">
+            <canvas id="threatRadarChart"
+                    data-ransom="40"
+                    data-c2="35"
+                    data-creds="30"
+                    data-web="25"
+                    data-persist="20"
+                    data-evasion="15">
+            </canvas>
+        </div>
+    </div>
+
+    <!-- AI / ML Engine & System Readiness -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>🤖</span> AI Decision Engine</h2>
+            <span class="badge badge-low">Operational</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="background: rgba(11, 15, 23, 0.6); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                    <span style="color: var(--text-secondary);">Isolation Forest Baseline</span>
+                    <span style="color: var(--low-green); font-weight: 600;">Calibrated</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                    <span style="color: var(--text-secondary);">MITRE ATT&CK Enterprise Matrix</span>
+                    <span style="color: #60a5fa; font-weight: 600;">v14.1 Integrated</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                    <span style="color: var(--text-secondary);">Heuristic YARA Ruleset</span>
+                    <span style="color: #f59e0b; font-weight: 600;">Active Scanning</span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: var(--low-bg); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px; border-radius: var(--radius-sm); text-align: center;">
+                    <div style="font-size: 11px; color: var(--low-green);">Normal Baselines</div>
+                    <div style="font-size: 20px; font-weight: 700; color: var(--low-green); margin-top: 4px;">{{ stats.ai_stats.Normal }}</div>
+                </div>
+                <div style="background: var(--crit-bg); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: var(--radius-sm); text-align: center;">
+                    <div style="font-size: 11px; color: var(--crit-red);">Anomalies Flagged</div>
+                    <div style="font-size: 20px; font-weight: 700; color: var(--crit-red); margin-top: 4px;">{{ stats.ai_stats.Anomalous }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Test Scenarios Banner -->
+<div class="panel-card" style="background: linear-gradient(135deg, rgba(19, 27, 46, 0.9), rgba(30, 41, 59, 0.6)); border-color: rgba(59, 130, 246, 0.3);">
+    <div class="panel-header" style="border-bottom: none; margin-bottom: 12px;">
+        <h2><span>⚡</span> Instant Demonstration Datasets (1-Click Test)</h2>
+        <a href="{{ url_for('upload_page') }}" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">Custom Upload &rarr;</a>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+        Select any pre-packaged real-world forensic scenario to immediately run automated triage, ML anomaly detection, and report generation:
+    </p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <form method="POST" action="{{ url_for('run_sample_triage', sample_id='ransomware') }}">
+            <button type="submit" class="btn btn-secondary" style="font-size: 12px; border-color: var(--crit-red);">
+                🔥 Ransomware Incident (LockBit Syslog)
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('run_sample_triage', sample_id='web') }}">
+            <button type="submit" class="btn btn-secondary" style="font-size: 12px; border-color: var(--high-orange);">
+                🌐 Web Server Exploit & WebShell
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('run_sample_triage', sample_id='apt') }}">
+            <button type="submit" class="btn btn-secondary" style="font-size: 12px; border-color: var(--med-yellow);">
+                🗝️ APT Persistence Registry Hive
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('run_sample_triage', sample_id='network') }}">
+            <button type="submit" class="btn btn-secondary" style="font-size: 12px; border-color: var(--accent-blue);">
+                📡 C2 Beaconing & DNS Tunneling
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('run_sample_triage', sample_id='memory') }}">
+            <button type="submit" class="btn btn-secondary" style="font-size: 12px; border-color: var(--accent-purple);">
+                🧠 Process Injection (Mimikatz Memory Dump)
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Recent Investigations Table -->
+<div class="panel-card">
+    <div class="panel-header">
+        <h2><span>📋</span> Recent Forensic Investigations</h2>
+        <a href="{{ url_for('history_page') }}" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">View All Investigations</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Evidence Filename</th>
+                    <th>Ingestion Time</th>
+                    <th>Risk Score</th>
+                    <th>Risk Level</th>
+                    <th>Primary Vector</th>
+                    <th>IOCs</th>
+                    <th>AI Anomaly</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_investigations %}
+                    {% for inv in recent_investigations %}
+                        <tr>
+                            <td>#{{ inv.id }}</td>
+                            <td>
+                                <strong>{{ inv.filename }}</strong>
+                                <div style="font-size: 10px; color: var(--text-muted); font-family: monospace;">{{ inv.sha256[:20] }}...</div>
+                            </td>
+                            <td style="color: var(--text-secondary); font-size: 12px;">{{ inv.upload_time }}</td>
+                            <td>
+                                <strong>{{ inv.risk_score }}</strong> / 100
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ inv.risk_level.lower() }}">{{ inv.risk_level }}</span>
+                            </td>
+                            <td>{{ inv.threat_classification }}</td>
+                            <td><span class="badge badge-info">{{ inv.total_iocs }} IOCs</span></td>
+                            <td>
+                                {% if inv.ml_anomaly_status == 'Normal' %}
+                                    <span class="badge badge-low">Normal</span>
+                                {% else %}
+                                    <span class="badge badge-critical">{{ inv.ml_anomaly_status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('view_investigation', investigation_id=inv.id) }}" class="btn btn-primary" style="padding: 5px 10px; font-size: 11.5px;">
+                                    Deep Dive &rarr;
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <div style="font-size: 32px; margin-bottom: 8px;">📂</div>
+                            <p>No investigations on record yet. Ingest an evidence file or run a sample test to begin.</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
