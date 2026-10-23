@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Investigation History & Audit Trail - Cyber Triage{% endblock %}
+{% block header_title %}Investigation History & Chain of Custody Audit Trail{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+    <div class="panel-header">
+        <h2><span>📋</span> All Completed Digital Forensic Investigations</h2>
+        <span class="badge badge-info">{{ investigations|length }} Total Records</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Case / Inv #</th>
+                    <th>Evidence Filename</th>
+                    <th>Acquisition Hash (SHA-256)</th>
+                    <th>Triage Timestamp</th>
+                    <th>Risk Score</th>
+                    <th>Severity Level</th>
+                    <th>Threat Classification</th>
+                    <th>IOC Count</th>
+                    <th>AI Anomaly</th>
+                    <th>Export & Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if investigations %}
+                    {% for inv in investigations %}
+                        <tr>
+                            <td><strong>#{{ inv.id }}</strong></td>
+                            <td>
+                                <strong>{{ inv.filename }}</strong>
+                                <div style="font-size: 11px; color: var(--text-muted);">{{ inv.file_size }} bytes</div>
+                            </td>
+                            <td>
+                                <code style="font-size: 10px; color: var(--accent-cyan);">{{ inv.sha256[:24] }}...</code>
+                            </td>
+                            <td style="font-size: 12px; color: var(--text-secondary);">{{ inv.upload_time }}</td>
+                            <td><strong>{{ inv.risk_score }}</strong> / 100</td>
+                            <td><span class="badge badge-{{ inv.risk_level.lower() }}">{{ inv.risk_level }}</span></td>
+                            <td>{{ inv.threat_classification }}</td>
+                            <td><span class="badge badge-info">{{ inv.total_iocs }}</span></td>
+                            <td>
+                                {% if inv.ml_anomaly_status == 'Normal' %}
+                                    <span class="badge badge-low">Normal</span>
+                                {% else %}
+                                    <span class="badge badge-critical">{{ inv.ml_anomaly_status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 6px;">
+                                    <a href="{{ url_for('view_investigation', investigation_id=inv.id) }}" class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;">
+                                        View
+                                    </a>
+                                    <a href="{{ url_for('download_report', investigation_id=inv.id, fmt='pdf') }}" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">
+                                        PDF
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            No investigations recorded.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- System Activity & Audit Trail -->
+<div class="panel-card" style="margin-top: 20px;">
+    <div class="panel-header">
+        <h2><span>🔍</span> Forensic Audit Trail & User Actions</h2>
+        <span class="badge badge-low">Tamper Evident</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>Investigator</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in audit_logs %}
+                    <tr>
+                        <td style="font-size: 12px; color: var(--text-secondary); font-family: monospace;">{{ log.timestamp }}</td>
+                        <td><strong>{{ log.action }}</strong></td>
+                        <td>{{ log.user }}</td>
+                        <td style="color: var(--text-secondary); font-size: 12.5px;">{{ log.details }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

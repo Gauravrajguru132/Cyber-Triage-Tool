@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Live Host Forensic Triage - Cyber Triage Platform{% endblock %}
+{% block header_title %}Live Endpoint Telemetry & Volatile Data Capture{% endblock %}
+
+{% block content %}
+<!-- System Telemetry Cards -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label"><span>Endpoint Hostname</span><span>💻</span></div>
+        <div class="stat-value" style="font-size: 20px;">{{ sysinfo.hostname }}</div>
+        <div class="stat-desc">{{ sysinfo.os }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><span>CPU & Architecture</span><span>⚡</span></div>
+        <div class="stat-value" style="font-size: 20px;">{{ sysinfo.cpu_cores }} Cores ({{ sysinfo.cpu_usage_pct }}%)</div>
+        <div class="stat-desc">{{ sysinfo.architecture }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><span>Memory Utilization</span><span>📊</span></div>
+        <div class="stat-value" style="font-size: 20px;">{{ sysinfo.used_memory_gb }} / {{ sysinfo.total_memory_gb }} GB</div>
+        <div class="stat-desc">{{ sysinfo.memory_usage_pct }}% RAM Allocated</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label"><span>Suspicious Processes</span><span>⚠️</span></div>
+        <div class="stat-value" style="font-size: 20px; color: {% if proc_info.suspicious_process_count > 0 %}var(--crit-red){% else %}var(--low-green){% endif %};">
+            {{ proc_info.suspicious_process_count }} Flagged
+        </div>
+        <div class="stat-desc">Out of {{ proc_info.total_processes }} active tasks</div>
+    </div>
+</div>
+
+<!-- Action Banner -->
+<div class="panel-card" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(19, 27, 46, 0.9), rgba(2, 132, 199, 0.2)); border-color: var(--accent-cyan);">
+    <div>
+        <h3 style="font-size: 16px; margin-bottom: 4px;">Live Volatile Endpoint Snapshot Ready</h3>
+        <p style="font-size: 12.5px; color: var(--text-secondary);">
+            Ingest and run AI threat detection on this host's running processes, open network sockets, and persistence keys.
+        </p>
+    </div>
+    <form action="{{ url_for('run_live_triage') }}" method="POST">
+        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #06b6d4);">
+            <span>⚡ Snapshot & Ingest Live Triage Case</span>
+        </button>
+    </form>
+</div>
+
+<!-- Running Processes Table -->
+<div class="panel-card">
+    <div class="panel-header">
+        <h2><span>⚙️</span> Active Running Processes</h2>
+        <span class="badge badge-info">{{ proc_info.processes|length }} Listed</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>PID</th>
+                    <th>PPID</th>
+                    <th>Process Name</th>
+                    <th>User</th>
+                    <th>CPU %</th>
+                    <th>Memory %</th>
+                    <th>Flag / Status</th>
+                    <th>Command Line</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in proc_info.processes %}
+                    <tr {% if p.is_suspicious %}style="background: rgba(239, 68, 68, 0.08);"{% endif %}>
+                        <td><code>{{ p.pid }}</code></td>
+                        <td><code>{{ p.ppid }}</code></td>
+                        <td><strong>{{ p.name }}</strong></td>
+                        <td style="font-size: 12px; color: var(--text-secondary);">{{ p.user }}</td>
+                        <td>{{ p.cpu_pct }}%</td>
+                        <td>{{ p.mem_pct }}%</td>
+                        <td>
+                            {% if p.is_suspicious %}
+                                <span class="badge badge-critical">SUSPICIOUS: {{ p.suspicion_reason }}</span>
+                            {% else %}
+                                <span class="badge badge-low">Normal</span>
+                            {% endif %}
+                        </td>
+                        <td><code style="font-size: 11px; color: var(--text-secondary);">{{ p.cmdline }}</code></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Network Connections Table -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Listening Ports -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>👂</span> Active Listening Ports</h2>
+            <span class="badge badge-low">{{ net_info.listening_ports|length }} Ports</span>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Proto</th><th>Local Port</th><th>Process (PID)</th></tr>
+                </thead>
+                <tbody>
+                    {% for lp in net_info.listening_ports %}
+                        <tr>
+                            <td><span class="badge badge-info">{{ lp.protocol }}</span></td>
+                            <td><code>{{ lp.local_address }}</code></td>
+                            <td>{{ lp.process_name }} ({{ lp.pid }})</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Established External Connections -->
+    <div class="panel-card">
+        <div class="panel-header">
+            <h2><span>🌐</span> Established Network Sockets</h2>
+            <span class="badge badge-high">{{ net_info.established_connections|length }} Established</span>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Local</th><th>Remote Address</th><th>Process</th></tr>
+                </thead>
+                <tbody>
+                    {% if net_info.established_connections %}
+                        {% for ec in net_info.established_connections %}
+                            <tr>
+                                <td><code>{{ ec.local_address }}</code></td>
+                                <td><code style="color: var(--accent-cyan);">{{ ec.remote_address }}</code></td>
+                                <td>{{ ec.process_name }} ({{ ec.pid }})</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">No established remote connections detected.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

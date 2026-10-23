@@ -1,0 +1,64 @@
+{
+    "type": "bundle",
+    "id": "bundle--20260918_202011",
+    "objects": [
+        {
+            "type": "identity",
+            "spec_version": "2.1",
+            "id": "identity--adcet-cyber-triage",
+            "name": "Cyber Triage DFIR Platform (ADCET)",
+            "identity_class": "organization"
+        },
+        {
+            "type": "report",
+            "spec_version": "2.1",
+            "id": "report--ransomware_incident_syslog-20260918_202011",
+            "name": "Forensic Triage Report: ransomware_incident_syslog.log",
+            "description": "Automated digital forensic triage of 'ransomware_incident_syslog.log' identified a CRITICAL risk rating (Score: 100/100). The primary threat vector is classified as 'Ransomware / Extortion' (44.0% confidence). Cyber Kill Chain stage reached: 'Critical Stage - Active Threat Impact / Ransomware Execution' (100.0%). Identified 6 IOCs, 3 signature hits, and 5 MITRE techniques. AI Isolation Forest Anomaly marked status as 'Anomalous'.",
+            "published": "2026-09-18T14:50:11Z",
+            "object_refs": [
+                "identity--adcet-cyber-triage",
+                "indicator--ip-0-20260918_202011",
+                "indicator--ip-1-20260918_202011",
+                "indicator--hash-0-20260918_202011",
+                "indicator--hash-1-20260918_202011"
+            ]
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--ip-0-20260918_202011",
+            "pattern_type": "stix",
+            "pattern": "[ipv4-addr:value = '194.26.29.112']",
+            "valid_from": "2026-09-18T14:50:11Z",
+            "name": "Malicious / Suspicious IP: 194[.]26[.]29[.]112"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--ip-1-20260918_202011",
+            "pattern_type": "stix",
+            "pattern": "[ipv4-addr:value = '185.220.101.5']",
+            "valid_from": "2026-09-18T14:50:11Z",
+            "name": "Malicious / Suspicious IP: 185[.]220[.]101[.]5"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--hash-0-20260918_202011",
+            "pattern_type": "stix",
+            "pattern": "[file:hashes.'sha-256' = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855']",
+            "valid_from": "2026-09-18T14:50:11Z",
+            "name": "File Hash SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--hash-1-20260918_202011",
+            "pattern_type": "stix",
+            "pattern": "[file:hashes.'md5' = '7b2c9a6234b071e62a8291a13426e95c']",
+            "valid_from": "2026-09-18T14:50:11Z",
+            "name": "File Hash MD5: 7b2c9a6234b071e62a8291a13426e95c"
+        }
+    ]
+}

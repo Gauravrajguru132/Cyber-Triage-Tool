@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Report Export - Cyber Triage Platform{% endblock %}
+{% block header_title %}Forensic Report Generated Successfully{% endblock %}
+
+{% block content %}
+<div class="panel-card" style="max-width: 750px; margin: 40px auto; text-align: center; padding: 40px 30px;">
+    <div style="font-size: 54px; margin-bottom: 16px; color: var(--low-green);">✅</div>
+    <h2 style="font-size: 22px; margin-bottom: 8px;">Forensic Triage Report Ready</h2>
+    <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 24px;">
+        The report for evidence <strong>{{ filename }}</strong> has been compiled according to ISO/IEC 27037 digital evidence standards.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 30px;">
+        <a href="{{ report_url }}" download class="btn btn-primary" style="font-size: 14px; padding: 12px 24px;">
+            <span>📥 Download Report Document</span>
+        </a>
+        <a href="{{ url_for('view_investigation', investigation_id=investigation_id) }}" class="btn btn-secondary" style="font-size: 14px; padding: 12px 24px;">
+            <span>&larr; Back to Investigation Case</span>
+        </a>
+    </div>
+
+    <div style="border-top: 1px solid var(--border-color); padding-top: 16px; font-size: 12px; color: var(--text-muted);">
+        <p>ADCET Cyber Triage Platform | Academic Project by Pragati Patil, Tanisha Lohar, Gaurav Rajguru</p>
+    </div>
+</div>
+{% endblock %}

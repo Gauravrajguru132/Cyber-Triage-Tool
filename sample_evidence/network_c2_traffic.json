@@ -1,0 +1,45 @@
+{
+  "triage_capture_metadata": {
+    "interface": "eth0",
+    "sensor_id": "SOC-SENSOR-NORTH",
+    "capture_period": "2026-08-17T03:00:00Z to 2026-08-17T03:30:00Z"
+  },
+  "flows": [
+    {
+      "timestamp": "2026-08-17 03:01:15",
+      "src_ip": "10.0.4.15",
+      "src_port": 49152,
+      "dst_ip": "185.190.140.222",
+      "dst_port": 443,
+      "protocol": "TCP",
+      "bytes_sent": 8420,
+      "bytes_received": 120500,
+      "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)",
+      "threat_signature": "Cobalt Strike HTTPS Malleable C2 Beacon",
+      "uri": "/jquery-3.3.1.slim.min.js",
+      "alert_level": "Critical"
+    },
+    {
+      "timestamp": "2026-08-17 03:05:42",
+      "src_ip": "10.0.4.15",
+      "src_port": 53210,
+      "dst_ip": "194.87.68.9",
+      "dst_port": 53,
+      "protocol": "UDP",
+      "dns_query": "stage1.exfil.data.ns1.darkmatter-c2.top",
+      "threat_signature": "Suspicious High-Frequency DNS Tunneling",
+      "alert_level": "High"
+    },
+    {
+      "timestamp": "2026-08-17 03:12:00",
+      "src_ip": "10.0.4.15",
+      "src_port": 50114,
+      "dst_ip": "103.145.13.4",
+      "dst_port": 8080,
+      "protocol": "TCP",
+      "payload_preview": "GET /beacon/poll?id=WKSTN-99 HTTP/1.1\\r\\nHost: 103.145.13.4\\r\\nCookie: session=7f8b9a12c4e5",
+      "threat_signature": "Meterpreter HTTP Stager Poll",
+      "alert_level": "Critical"
+    }
+  ]
+}
