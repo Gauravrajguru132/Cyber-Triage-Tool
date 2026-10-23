@@ -145,13 +145,13 @@ def upload_file():
         case_number=f"CASE-{case_id:04d}"
     )
 
-    accept = request.headers.get("Accept", "")
-wants_json = (
-    request.is_json
-    or request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    or "application/json" in accept and "text/html" not in accept
-)
-if wants_json:
+        accept = request.headers.get("Accept", "")
+    wants_json = (
+        request.is_json
+        or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or ("application/json" in accept and "text/html" not in accept)
+    )
+    if wants_json:
         return jsonify({
             "status": "success",
             "report_ready": True,
