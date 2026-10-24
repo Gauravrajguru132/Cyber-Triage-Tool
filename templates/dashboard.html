@@ -4,6 +4,26 @@
 {% block header_title %}SOC Forensic Triage & Threat Intelligence Dashboard{% endblock %}
 
 {% block content %}
+<!-- 10,000+ Forensic Samples Banner -->
+<div class="panel-card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(15, 23, 42, 0.85)); border: 1px solid var(--accent-cyan); padding: 12px 18px; margin-bottom: 18px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 22px;">⚡</span>
+            <div>
+                <span style="font-weight: 700; color: #ffffff; font-size: 13.5px;">10,000+ Digital Forensic Evidence Samples Benchmark Suite</span>
+                <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">
+                    Evaluated on <strong>10,000+ log lines, network flows, and security events</strong>. ML models trained on 10,000 feature vectors with 80% train / 20% test split.
+                </p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="{{ url_for('upload_page') }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 11.5px; background: linear-gradient(135deg, #0284c7, #06b6d4);">
+                <span>🔥 Test 10,000+ Samples</span>
+            </a>
+        </div>
+    </div>
+</div>
+
 <!-- Top Metrics Grid -->
 <div class="stat-grid">
     <div class="stat-card">

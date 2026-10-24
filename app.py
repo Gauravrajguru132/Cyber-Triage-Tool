@@ -181,7 +181,11 @@ def run_sample_triage(sample_id):
         "web": "web_server_compromise.log",
         "apt": "apt_persistence_registry.reg",
         "network": "network_c2_traffic.json",
-        "memory": "memory_process_dump.txt"
+        "memory": "memory_process_dump.txt",
+        "enterprise_10k": "enterprise_forensic_syslog_10000.log",
+        "security_events_10k": "cyber_security_events_10000.csv",
+        "network_flows_10k": "network_flows_10000.json",
+        "forensic_ml_10k": "forensic_ml_dataset_10000.csv"
     }
 
     if sample_id not in sample_files:

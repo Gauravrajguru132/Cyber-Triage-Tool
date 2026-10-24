@@ -32,13 +32,14 @@ def run_tests():
     init_db()
     print("    -> Database initialized successfully.")
 
-    # 2. Test Sample Evidence Datasets
+    # 2. Test Sample Evidence Datasets (including 10,000+ benchmark)
     samples = [
         "ransomware_incident_syslog.log",
         "web_server_compromise.log",
         "apt_persistence_registry.reg",
         "network_c2_traffic.json",
-        "memory_process_dump.txt"
+        "memory_process_dump.txt",
+        "enterprise_forensic_syslog_10000.log"
     ]
 
     sample_dir = os.path.join(curr_dir, "sample_evidence")
